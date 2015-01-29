@@ -51,15 +51,16 @@ namespace AIM.Autoplay.Modes
             {
                 return;
             }
-
-            if (Environment.TickCount - LastMove < Menu.Item("MovementDelay").GetValue<Slider>().Value && args.Order == GameObjectOrder.MoveTo &&
-                Menu.Item("MovementEnabled").GetValue<bool>())
+            if (args.Order == GameObjectOrder.MoveTo)
             {
-                args.Process = false;
-                return;
+                if (Environment.TickCount - LastMove < Menu.Item("MovementDelay").GetValue<Slider>().Value &&
+                    Menu.Item("MovementEnabled").GetValue<bool>())
+                {
+                    args.Process = false;
+                    return;
+                }
+                LastMove = Environment.TickCount;
             }
-
-            LastMove = Environment.TickCount;
 
             if (args.Target == null)
             {
