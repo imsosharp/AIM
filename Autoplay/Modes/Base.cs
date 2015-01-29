@@ -25,6 +25,7 @@ namespace AIM.Autoplay.Modes
             ObjHeroes = new Heroes();
             ObjMinions = new Minions();
             ObjTurrets = new Turrets();
+            Menu = new Menu("AIM", "AIM", true);
             ObjHQ = new HQ();
             Orbwalker = Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             OrbW = new Orbwalking.Orbwalker(Orbwalker);
@@ -51,11 +52,6 @@ namespace AIM.Autoplay.Modes
                 return;
             }
 
-            if (args.Target.IsEnemy && sender.UnderTurret(true) && (args.Order == GameObjectOrder.AutoAttack || args.Order == GameObjectOrder.AttackUnit))
-            {
-                args.Process = false;
-            }
-
             if (Environment.TickCount - LastMove < Menu.Item("MovementDelay").GetValue<Slider>().Value && args.Order == GameObjectOrder.MoveTo &&
                 Menu.Item("MovementEnabled").GetValue<bool>())
             {
@@ -64,6 +60,15 @@ namespace AIM.Autoplay.Modes
             }
 
             LastMove = Environment.TickCount;
+
+            if (args.Target == null)
+            {
+                return;
+            }
+            if (args.Target.IsEnemy && sender.UnderTurret(true) && (args.Order == GameObjectOrder.AutoAttack || args.Order == GameObjectOrder.AttackUnit))
+            {
+                args.Process = false;
+            }
         }
 
         public void RefreshMinions()

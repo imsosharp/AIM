@@ -15,7 +15,6 @@ namespace AIM.Autoplay.Modes
             Game.OnGameUpdate += OnGameUpdate;
             CustomEvents.Game.OnGameLoad += OnGameLoad;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
-            Game.OnGameUpdate -= Load.OnGameUpdate;
         }
 
         public override void OnGameLoad(EventArgs args)

@@ -32,10 +32,11 @@ namespace AIM.Autoplay
 
                 LoadedTime = Environment.TickCount;
 
-                new Carry(); Console.WriteLine("Carry Init Success!");
-                new AutoLevel(Util.Data.AutoLevel.GetSequence()); Console.WriteLine("AutoLevel Init Success!");
 
-                Base.Menu = new Menu("AIM", "AIM", true);
+
+                new Carry(); Console.WriteLine("Carry Init Success!");
+
+                new AutoLevel(Util.Data.AutoLevel.GetSequence()); Console.WriteLine("AutoLevel Init Success!");
 
                 //AIM Settings
                 Base.Menu.AddItem(new MenuItem("Enabled", "Enabled").SetValue(new KeyBind(32, KeyBindType.Toggle)));
@@ -47,6 +48,7 @@ namespace AIM.Autoplay
                 move.AddItem(new MenuItem("MovementDelay", "Movement Delay")).SetValue(new Slider(400, 0, 1000));
 
                 Base.Menu.AddToMainMenu();
+
                 Console.WriteLine("Menu Init Success!");
             }
             catch (Exception e)

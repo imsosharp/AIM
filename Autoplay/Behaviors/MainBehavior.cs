@@ -21,7 +21,7 @@ namespace AIM.Autoplay.Behaviors
                 {
                     return 5;
                 }
-                if (new Conditionals().JoinTeamFight.Tick() == BehaviorState.Success)
+                if (new Conditionals().JoinTeamFight.Tick() == BehaviorState.Success && new Strategy.Positioning.Util().GetAllyPosList().Count != 0)
                 {
                     return 1;
                 }
