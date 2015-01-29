@@ -37,7 +37,7 @@ namespace AIM.Autoplay.Behaviors.Strategy
             new Conditional(
                 () => Relics.ClosestRelic() != null && new Conditionals().LowHealth.Tick() == BehaviorState.Success);
         internal Conditional LowHealth = new Conditional(() => Heroes.Me.HealthPercentage() < Modes.Base.Menu.Item("LowHealth").GetValue<Slider>().Value);
-        internal Conditional NoMinions = new Conditional(() => (Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift) ? Environment.TickCount - Load.LoadedTime >= 115 : Environment.TickCount - Load.LoadedTime >= 60 || (Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift) ? Heroes.Me.Level >= 1 : Heroes.Me.Level >= 3);
+        internal Conditional NoMinions = new Conditional(() => ((Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift) ? (Environment.TickCount - Load.LoadedTime < 115) : (Environment.TickCount - Load.LoadedTime <= 60)) || ((Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift) ? (Heroes.Me.Level == 1) : (Heroes.Me.Level <= 3)));
 
         internal Conditional AlliesAreDead =
             new Conditional(() => ObjectManager.Get<Obj_AI_Hero>().All(h => h.IsAlly && h.IsDead));

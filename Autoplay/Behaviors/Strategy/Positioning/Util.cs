@@ -33,7 +33,7 @@ namespace AIM.Autoplay.Behaviors.Strategy.Positioning
 
         public List<Vector2> GetAllyPosList()
         {
-            var allies = ObjectManager.Get<Obj_AI_Hero>().FindAll(h => h.IsAlly && !h.IsDead && !h.InFountain()).ToList();
+            var allies = ObjectManager.Get<Obj_AI_Hero>().FindAll(h => h.IsAlly && !h.IsMe && !h.IsDead && !h.InFountain()).ToList();
             return allies.Select(ally => ally.ServerPosition.To2D()).ToList();
         }
         public List<Vector2> GetEnemyPosList()

@@ -15,7 +15,7 @@ namespace AIM.Autoplay.Behaviors.Strategy
         internal Sequence StayWithinExpRange = new Sequence(new Actions().StayWithinExpRange);
         internal Sequence CollectHealthPack = new Sequence(new Actions().CollectHealthRelic, new Conditionals().ShouldCollectHealthRelic);
         internal Sequence TryToKill = new Sequence(new Actions().KillEnemy);
-        internal Sequence WalkToLane = new Sequence(new Actions().ProtectFarthestTurret, new Conditionals().NoMinions, new Inverters().MinionsHaveSpawned);
-        internal Sequence TeamFight = new Sequence(new Actions().Teamfight, new Inverters().AlliesAreDead);
+        internal Sequence WalkToLane = new Sequence(new Actions().ProtectFarthestTurret, new Conditionals().NoMinions);
+        internal Sequence TeamFight = new Sequence(new Actions().Teamfight);
     }
 }
