@@ -21,11 +21,12 @@ namespace AIM.Autoplay.Behaviors
                 var heroes = new Heroes();
                 var minions = new Minions();
 
-                if (((Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift) ? (Environment.TickCount - Load.LoadedTime < 115) : (Environment.TickCount - Load.LoadedTime <= 60)) || ((Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift) ? (Heroes.Me.Level == 1) : (Heroes.Me.Level <= 3)))
+                if (!ObjectManager.Get<Obj_AI_Minion>().Any())
                 {
+                    Console.WriteLine("5");
                     return 5;
                 }
-                if (ObjectManager.Get<Obj_AI_Hero>().Any(h => !h.InFountain()) && new Strategy.Positioning.Util().GetAllyPosList().Count != 0)
+                if (ObjectManager.Get<Obj_AI_Hero>().Any(h => h.IsAlly && !h.IsMe && !h.InFountain()))
                 {
                     return 1;
                 }
