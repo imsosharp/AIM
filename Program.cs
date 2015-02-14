@@ -1,4 +1,6 @@
-﻿#region AiM License
+﻿#define DEBUG
+
+#region AiM License
 // Copyright 2015 LeagueSharp
 // Program.cs is part of AiM.
 //
@@ -35,8 +37,6 @@ using Paths = System.Collections.Generic.List<System.Collections.Generic.List<Cl
 using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 using AiM.Utils;
 #endregion AiM License
-
-#define DEBUG
 
 namespace AiM
 {
