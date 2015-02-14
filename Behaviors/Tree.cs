@@ -36,26 +36,23 @@ using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 using AiM.Utils;
 #endregion AiM License
 
-#define DEBUG
 
-namespace AiM
+namespace AiM.Behaviors
 {
-    class Program
+    internal static class Tree
     {
-        static void Main(string[] args)
-        {
-            var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
-            if (plugin != null)
+        internal static IndexSelector Root = new IndexSelector(
+            () =>
             {
-                plugin.GetConstructors().Initialize();
-            }
-            else
-            {
-                plugin = Type.GetType("AiM.Plugins.Default");
-                if (plugin == null) return;
-                plugin.GetConstructors().Initialize();
-            }
-                
-        }
+                if (ObjectManager.Player.IsDead)
+                {
+                    return 0;
+                }
+                if (Utility.Map.GetMap().Type == Utility.Map.MapType.HowlingAbyss)
+                {
+                    return 1;
+                }
+                return 0;
+            }, new Sequence(), ARAM.Branch.Node);
     }
 }

@@ -36,26 +36,10 @@ using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 using AiM.Utils;
 #endregion AiM License
 
-#define DEBUG
-
-namespace AiM
+namespace AiM.Behaviors.ARAM
 {
-    class Program
+    internal static class Branch
     {
-        static void Main(string[] args)
-        {
-            var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
-            if (plugin != null)
-            {
-                plugin.GetConstructors().Initialize();
-            }
-            else
-            {
-                plugin = Type.GetType("AiM.Plugins.Default");
-                if (plugin == null) return;
-                plugin.GetConstructors().Initialize();
-            }
-                
-        }
+        internal static Selector Node = new Selector(Shopping.ShoppingSequence, Orbwalking.GoToLane, Orbwalking.Mixed, Orbwalking.Farm, Orbwalking.Teamfight, Orbwalking.PushLane);
     }
 }

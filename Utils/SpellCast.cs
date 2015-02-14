@@ -36,26 +36,14 @@ using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 using AiM.Utils;
 #endregion AiM License
 
-#define DEBUG
 
-namespace AiM
+namespace AiM.Utils
 {
-    class Program
+    public static class SpellCast
     {
-        static void Main(string[] args)
+        public static Conditional CastCheck(this Spell spell)
         {
-            var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
-            if (plugin != null)
-            {
-                plugin.GetConstructors().Initialize();
-            }
-            else
-            {
-                plugin = Type.GetType("AiM.Plugins.Default");
-                if (plugin == null) return;
-                plugin.GetConstructors().Initialize();
-            }
-                
+            return new Conditional(() => spell.IsReady());
         }
     }
 }

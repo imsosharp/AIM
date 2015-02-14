@@ -1,7 +1,6 @@
-﻿#region LICENSE
-
-// Copyright 2014 - 2015 LeagueSharp
-// Default.cs is part of AiM.
+﻿#region AiM License
+// Copyright 2015 LeagueSharp
+// Program.cs is part of AiM.
 //
 // AiM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,73 +11,81 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
+//
 // You should have received a copy of the GNU General Public License
 // along with AiM. If not, see <http://www.gnu.org/licenses/>.
 
-#endregion
-
-#region
-
 using System;
-using AIM.Util;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
+using BehaviorSharp;
+using BehaviorSharp.Components.Actions;
+using BehaviorSharp.Components.Composites;
+using BehaviorSharp.Components.Conditionals;
+using BehaviorSharp.Components.Decorators;
+using ClipperLib;
+using Color = System.Drawing.Color;
+using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
+using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
+using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
+using AiM.Utils;
+#endregion AiM License
 
-#endregion
 
-namespace AIM.Plugins
+namespace AiM.Plugins
 {
-    public class Default : PluginBase
+    internal class Default : AiMPlugin
     {
-        public Default()
+        internal Default()
         {
-            Author = "imsosharp";
+            //Initializing spells
             Q = new Spell(SpellSlot.Q, 600);
             W = new Spell(SpellSlot.W, 450);
             E = new Spell(SpellSlot.E, 200);
             R = new Spell(SpellSlot.R, 600);
 
+            //Get SpellData for spells
             var q = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.Q).Name);
             var w = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.W).Name);
             var e = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.E).Name);
             var r = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.R).Name);
 
+            //Set spells
             Q.SetSkillshot(q.SpellCastTime, q.LineWidth, q.MissileSpeed, true, SkillshotType.SkillshotLine);
             W.SetSkillshot(w.SpellCastTime, w.LineWidth, w.MissileSpeed, true, SkillshotType.SkillshotLine);
             E.SetTargetted(e.SpellCastTime, e.SpellCastTime);
             R.SetTargetted(r.SpellCastTime, r.SpellCastTime);
+
+            //Menu
+            ComboConfig.AddBool("ComboQ", "Use Q", true);
+            ComboConfig.AddBool("ComboW", "Use W", true);
+            ComboConfig.AddBool("ComboE", "Use E", true);
+            ComboConfig.AddBool("ComboR", "Use R", true);
         }
 
-        public override void OnUpdate(EventArgs args)
+        public override void OnGameUpdate(EventArgs args)
         {
-            if (ComboMode)
+            if (Q.CastCheck().Tick() == BehaviorState.Success)
             {
-                if (Q.CastCheck(Target, "ComboQ"))
-                {
-                    Q.Cast(Target);
-                }
-                if (W.CastCheck(Target, "ComboW"))
-                {
-                    W.Cast(Target);
-                }
-                if (E.CastCheck(Target, "ComboE"))
-                {
-                    E.Cast(Target);
-                }
-
-                if (R.CastCheck(Target, "ComboR"))
-                {
-                    R.Cast(Target);
-                }
+                Q.Cast(GetTarget(Q.Range, Q.DamageType));
+            } 
+            if (W.CastCheck().Tick() == BehaviorState.Success)
+            {
+                W.Cast(GetTarget(W.Range, W.DamageType));
+            } 
+            if (E.CastCheck().Tick() == BehaviorState.Success)
+            {
+                E.Cast(GetTarget(W.Range, W.DamageType));
+            } 
+            if (R.CastCheck().Tick() == BehaviorState.Success)
+            {
+                R.Cast(GetTarget(W.Range, W.DamageType));
             }
-        }
-
-        public override void ComboMenu(Menu config)
-        {
-            config.AddBool("ComboQ", "Use Q", true);
-            config.AddBool("ComboW", "Use W", true);
-            config.AddBool("ComboE", "Use E", true);
-            config.AddBool("ComboR", "Use R", true);
         }
     }
 }
