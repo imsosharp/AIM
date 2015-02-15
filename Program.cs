@@ -43,15 +43,21 @@ namespace AiM
         static void Main(string[] args)
         {
             var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
-            if (plugin != null)
+            try
             {
-                plugin.GetConstructors().Initialize();
+                if (plugin == null)
+                {
+                    plugin = Type.GetType("AiM.Plugins.Default");
+                }
+                if (plugin == null)
+                {
+                    return;
+                }
+                Activator.CreateInstance(plugin);
             }
-            else
+            catch (Exception e)
             {
-                plugin = Type.GetType("AiM.Plugins.Default");
-                if (plugin == null) return;
-                plugin.GetConstructors().Initialize();
+                Console.WriteLine(e);
             }
                 
         }
