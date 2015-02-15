@@ -41,7 +41,7 @@ namespace AiM.Plugins
 {
     internal class Default : AiMPlugin
     {
-        internal Default()
+        public Default()
         {
             //Initializing spells
             Q = new Spell(SpellSlot.Q, 600);

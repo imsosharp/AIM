@@ -40,7 +40,7 @@ namespace AiM
 {
     internal abstract class AiMPlugin
     {
-        internal AiMPlugin()
+        protected AiMPlugin()
         {
             //start behaviors
             CustomEvents.Game.OnGameLoad += load => { Behaviors.Tree.Root.Tick(); };
@@ -55,8 +55,8 @@ namespace AiM
             Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
         }
 
-        public static Obj_AI_Hero MyHero, Player = ObjectManager.Player;
-        public static string ChampionName = MyHero.BaseSkinName;
+        public static Obj_AI_Hero Player = ObjectManager.Player;
+        public static string ChampionName = Player.BaseSkinName;
         public static int LastMove { get; protected set; }
 
         #region Menu
@@ -83,7 +83,7 @@ namespace AiM
         internal void CreateMenu()
         {
             //root menu
-            Config = new Menu("AiM: " + MyHero.ChampionName, MenuName, true);
+            Config = new Menu("AiM: " + Player.ChampionName, MenuName, true);
             //Humanizer
             var move = Config.AddSubMenu(new Menu("Humanizer", "humanizer"));
             move.AddItem(new MenuItem("MovementEnabled", "Enabled").SetValue(true));
@@ -99,12 +99,12 @@ namespace AiM
         }
         #endregion Menu
         #region Spells
-        protected Spell Q;
-        protected Spell W;
-        protected Spell E;
-        protected Spell R;
+        internal static Spell Q;
+        internal static Spell W;
+        internal static Spell E;
+        internal static Spell R;
 
-        protected Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>();
+        internal static Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>();
         #endregion Spells
         #region Events
 
