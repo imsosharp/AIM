@@ -1,0 +1,17 @@
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\AiM.exe.config
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\AiM.exe
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\AiM.pdb
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\BehaviorSharp.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\clipper_library.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\LeagueSharp.Common.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\LeagueSharp.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\SharpDX.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\SharpDX.Toolkit.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\SharpDX.Toolkit.Graphics.dll
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\LeagueSharp.xml
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\SharpDX.Toolkit.xml
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Release\SharpDX.Toolkit.Graphics.xml
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\obj\Release\AiM.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\obj\Release\AiM.exe
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\obj\Release\AiM.pdb

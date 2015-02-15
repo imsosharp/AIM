@@ -1,0 +1,2 @@
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\bin\Debug\AiM.exe.config
+C:\Users\Administrator\Desktop\LSDev\Projects\AiM\obj\Debug\AiM.csprojResolveAssemblyReference.cache

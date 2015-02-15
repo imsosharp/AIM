@@ -1,6 +1,4 @@
-﻿#define DEBUG
-
-#region AiM License
+﻿#region AiM License
 // Copyright 2015 LeagueSharp
 // Program.cs is part of AiM.
 //
