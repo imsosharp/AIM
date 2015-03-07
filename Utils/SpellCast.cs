@@ -43,7 +43,7 @@ namespace AiM.Utils
     {
         public static Conditional CastCheck(this Spell spell)
         {
-            return new Conditional(() => spell.IsReady());
+            return new Conditional(() => spell.IsReady() && AiMPlugin.GetTarget(spell.Range, spell.DamageType).IsValidTarget());
         }
     }
 }

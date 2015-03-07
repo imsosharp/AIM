@@ -48,7 +48,7 @@ namespace AiM
             CreateMenu();
             //initialize events
             CustomEvents.Game.OnGameLoad += OnGameLoad;
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
             Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
@@ -63,7 +63,7 @@ namespace AiM
         internal static Menu Config;
         internal static Menu ComboConfig;
         internal static Menu LaningConfig;
-        internal static AiMOrbwalker.Orbwalker Orbwalker;
+        internal static Orbwalking.Orbwalker Orbwalker;
 
         public static TargetSelector Ts;
 
@@ -90,7 +90,7 @@ namespace AiM
             move.AddItem(new MenuItem("MovementDelay", "Movement Delay")).SetValue(new Slider(400, 0, 1000));
             //Orbwalker
             Config.AddSubMenu(new Menu("Orbwalking", "orbwalkingmenu"));
-            Orbwalker = new AiMOrbwalker.Orbwalker(Config.SubMenu("orbwalkingmenu"));
+            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("orbwalkingmenu"));
             //TargetSelector
             TargetSelector.AddToMenu(Config.AddSubMenu(new Menu("Target Selector", "tsmenu")));
             ComboConfig = Config.AddSubMenu(new Menu("Combo", "combomenu"));

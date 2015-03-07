@@ -75,7 +75,6 @@
     <Compile Include="Utils\Geometry.cs" />
     <Compile Include="Utils\Helpers.cs" />
     <Compile Include="Utils\Wizard.cs" />
-    <Compile Include="Utils\Orbwalker.cs" />
     <Compile Include="Utils\Positioning.cs" />
     <Compile Include="Utils\Structures.cs" />
   </ItemGroup>

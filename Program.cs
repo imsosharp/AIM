@@ -42,24 +42,28 @@ namespace AiM
     {
         static void Main(string[] args)
         {
-            var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
-            try
+            Console.Clear();
+            CustomEvents.Game.OnGameLoad += load =>
             {
-                if (plugin == null)
+                Helpers.Updater();
+                var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
+                try
                 {
-                    plugin = Type.GetType("AiM.Plugins.Default");
+                    if (plugin == null)
+                    {
+                        plugin = Type.GetType("AiM.Plugins.Default");
+                    }
+                    Activator.CreateInstance(plugin);
                 }
-                if (plugin == null)
+                catch (Exception e)
                 {
-                    return;
+                    Console.WriteLine(e);
                 }
-                Activator.CreateInstance(plugin);
-            }
-            catch (Exception e)
+            };
+            Game.OnUpdate += tick =>
             {
-                Console.WriteLine(e);
-            }
-                
+                Behaviors.Tree.Root.Tick();
+            };
         }
     }
 }

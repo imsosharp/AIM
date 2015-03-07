@@ -70,6 +70,10 @@ namespace AiM.Plugins
 
         public override void OnGameUpdate(EventArgs args)
         {
+            if (GetTarget(600, Q.DamageType) == null)
+            {
+                return;
+            }
             if (Q.CastCheck().Tick() == BehaviorState.Success)
             {
                 Q.Cast(GetTarget(Q.Range, Q.DamageType));

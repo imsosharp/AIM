@@ -45,9 +45,13 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction PushLaneAction = new BehaviorAction(
             () =>
             {
+                Drawing.OnDraw += d =>
+                {
+                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Push lane");
+                };
                 if (ObjectManager.Player.UnderTurret() && ObjectManager.Player.ServerPosition.CountEnemiesInRange(800) <= 2)
                 {
-                    AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.LaneClear;
+                    AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                     AiMPlugin.Orbwalker.ForceTarget(ObjectManager.Player.ServerPosition.GetClosestEnemyTurret());
                 }
                 var followminion = Wizard.GetFarthestMinion();
@@ -59,9 +63,9 @@ namespace AiM.Behaviors.ARAM
                             .To3D());
                     if (ObjectManager.Player.ServerPosition.CountEnemiesInRange(800) == 0)
                     {
-                        AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.LaneClear;
+                        AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                     }
-                    AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.Mixed;
+                    AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                     return BehaviorState.Success;
                 }
                 return BehaviorState.Failure;
@@ -70,11 +74,15 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction TeamfightAction = new BehaviorAction(
             () =>
             {
-                if (AiMOrbwalker.IsMelee(ObjectManager.Player))
+                Drawing.OnDraw += d =>
+                {
+                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Teamfight");
+                };
+                if (ObjectManager.Player.IsMelee())
                 {
                     var target = AiMPlugin.GetMeleeTarget();
                     AiMPlugin.Orbwalker.ForceTarget(target);
-                    AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.Combo;
+                    AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Combo;
                     if (!target.UnderTurret() && target != null)
                     {
                         AiMPlugin.Orbwalker.SetOrbwalkingPoint(target.ServerPosition);
@@ -88,7 +96,7 @@ namespace AiM.Behaviors.ARAM
                     var target = AiMPlugin.GetTarget(
                         ObjectManager.Player.AttackRange, TargetSelector.DamageType.Physical);
                     AiMPlugin.Orbwalker.ForceTarget(target);
-                    AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.Combo;
+                    AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Combo;
                     AiMPlugin.Orbwalker.SetOrbwalkingPoint(
                         new Vector2(target.ServerPosition.X + def, target.ServerPosition.Y + def).To3D());
                     return BehaviorState.Success;
@@ -98,10 +106,14 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction GoToLaneAction = new BehaviorAction(
             () =>
             {
+                Drawing.OnDraw += d =>
+                {
+                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Go To Lane");
+                };
                 var turret = Wizard.GetFarthestAllyTurret();
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
                 var pos = new Vector2(turret.Position.X + rInt, turret.Position.Y + rInt).To3D();
-                AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.Mixed;
+                AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
                 if (ObjectManager.Player.Distance(pos) < 500)
                 {
@@ -117,9 +129,13 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction FarmAction = new BehaviorAction(
             () =>
             {
+                Drawing.OnDraw += d =>
+                {
+                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Farm");
+                };
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
                 var pos = new Vector2(ObjectManager.Player.ServerPosition.X + rInt, ObjectManager.Player.Position.Y + rInt).To3D();
-                AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.LaneClear;
+                AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
                 return BehaviorState.Success;
             });
@@ -127,6 +143,10 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction MixedAction = new BehaviorAction(
             () =>
             {
+                Drawing.OnDraw += d =>
+                {
+                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Mixed");
+                };
                 var minion = Wizard.GetClosestEnemyMinion();
                 var rInt = new Random().Next(650, 1100) * Wizard.GetDefensiveMultiplier();
                 Vector3 pos;
@@ -138,7 +158,7 @@ namespace AiM.Behaviors.ARAM
                 {
                     pos = EasyPositioning.GetPos().To3D().Distance(minion.Position) < 1250 ? EasyPositioning.GetPos().To3D() : new Vector2(minion.ServerPosition.X + rInt, minion.ServerPosition.Y + rInt).To3D();
                 }
-                AiMPlugin.Orbwalker.ActiveMode = AiMOrbwalker.OrbwalkingMode.Mixed;
+                AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
                 return BehaviorState.Success;
             });
@@ -149,7 +169,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldPushLane = new Conditional(
             () =>
             {
-                if (ObjectManager.Player.ServerPosition.CountNearbyEnemies(4000) == 0)
+                if (ObjectManager.Player.ServerPosition.CountNearbyEnemies(4000) == 0 && Wizard.GetFarthestMinion() != null)
                 {
                     return true;
                 }
@@ -169,7 +189,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldGoToLane = new Conditional(
             () =>
             {
-                if (ObjectManager.Player.Level == 3 && !ObjectManager.Get<Obj_AI_Minion>().Any())
+                if (ObjectManager.Player.Level == 3 && Wizard.GetFarthestMinion() == null)
                 {
                     return true;
                 }
@@ -179,6 +199,8 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldTeamfight = new Conditional(
             () =>
             {
+                if (HeroManager.Enemies.Count == 0)
+                {return false;}
                 if (Positioning.GetAllyZone().Intersect(Positioning.GetEnemyZone()).Count() >= Positioning.GetAllyZone().Count / 3)
                 {
                     return true;
@@ -218,11 +240,11 @@ namespace AiM.Behaviors.ARAM
         #endregion Conditionals
 
         #region Inverters
-        internal static Inverter DontPushLane = new Inverter(new Conditional(() => ShouldPushLane.Tick() != BehaviorState.Success));
-        internal static Inverter DontFarm = new Inverter(new Conditional(() => ShouldFarm.Tick() != BehaviorState.Success));
-        internal static Inverter DontGoToLane = new Inverter(new Conditional(() => ShouldGoToLane.Tick() != BehaviorState.Success));
-        internal static Inverter DontTeamfight = new Inverter(new Conditional(() => ShouldTeamfight.Tick() != BehaviorState.Success));
-        internal static Inverter MixedInverter = new Inverter(new Conditional(() => MixedConditional.Tick() != BehaviorState.Success));
+        internal static Inverter DontPushLane = new Inverter(new Conditional(() => ShouldPushLane.Tick() == BehaviorState.Failure));
+        internal static Inverter DontFarm = new Inverter(new Conditional(() => ShouldFarm.Tick() == BehaviorState.Failure));
+        internal static Inverter DontGoToLane = new Inverter(new Conditional(() => ShouldGoToLane.Tick() == BehaviorState.Failure));
+        internal static Inverter DontTeamfight = new Inverter(new Conditional(() => ShouldTeamfight.Tick() == BehaviorState.Failure));
+        internal static Inverter MixedInverter = new Inverter(new Conditional(() => MixedConditional.Tick() == BehaviorState.Failure));
         #endregion
 
         #region Sequences

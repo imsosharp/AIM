@@ -40,6 +40,6 @@ namespace AiM.Behaviors.ARAM
 {
     internal static class Branch
     {
-        internal static Selector Node = new Selector(Shopping.ShoppingSequence, Orbwalking.GoToLane, Orbwalking.Mixed, Orbwalking.Farm, Orbwalking.Teamfight, Orbwalking.PushLane);
+        internal static Selector Node = new Selector(Orbwalking.GoToLane, Orbwalking.Mixed, Orbwalking.Farm, Orbwalking.Teamfight, Orbwalking.PushLane);
     }
 }

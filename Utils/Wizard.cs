@@ -42,13 +42,13 @@ namespace AiM.Utils
     {
         public static Obj_AI_Turret GetClosestEnemyTurret(this Vector3 point)
         {
-            var turrets = ObjectManager.Get<Obj_AI_Turret>().FindAll(t => !t.IsAlly);
+            var turrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => !t.IsAlly);
             return turrets.OrderBy(t => t.Distance(point)).FirstOrDefault();
         }
 
         public static Obj_AI_Turret GetFarthestAllyTurret()
         {
-            var turrets = ObjectManager.Get<Obj_AI_Turret>().FindAll(t => t.IsAlly);
+            var turrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsAlly);
             var nexus = ObjectManager.Get<Obj_HQ>().FirstOrDefault(hq => hq.IsAlly);
             return turrets.OrderByDescending(t => t.Distance(nexus != null ? nexus.Position : ObjectManager.Player.ServerPosition)).FirstOrDefault();
         }
@@ -57,7 +57,7 @@ namespace AiM.Utils
         {
             return
                 ObjectManager.Get<Obj_AI_Minion>()
-                    .FindAll(m => m.IsAlly)
+                    .Where(m => m.IsAlly)
                     .OrderBy(m => GetClosestEnemyTurret(m.Position))
                     .FirstOrDefault();
         }
@@ -66,7 +66,7 @@ namespace AiM.Utils
         {
             return
                 ObjectManager.Get<Obj_AI_Minion>()
-                    .FindAll(m => m.IsAlly)
+                    .Where(m => m.IsAlly)
                     .OrderBy(m => GetClosestEnemyTurret(lanepos))
                     .FirstOrDefault();
         }
@@ -75,7 +75,7 @@ namespace AiM.Utils
         {
             var minion =
                 ObjectManager.Get<Obj_AI_Minion>()
-                    .FindAll(m => !m.IsAlly && m.IsValid<Obj_AI_Minion>() && !m.IsHeroPet())
+                    .Where(m => !m.IsAlly && m.IsValid<Obj_AI_Minion>() && !m.IsHeroPet())
                     .OrderBy(m => m.Distance(ObjectManager.Player))
                     .FirstOrDefault();
             return minion;

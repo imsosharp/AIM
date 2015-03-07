@@ -55,9 +55,8 @@ namespace AiM.Utils
                 var newmessage = message;
                 for (var i = 0; i < 10; i++)
                 {
-                    newmessage.Replace("{" + i + "}", @params[i].ToString());
+                    newmessage = newmessage.Replace("{" + i + "}", @params[i].ToString());
                 }
-                message.Replace("{0}", @params[0].ToString());
                 Game.PrintChat("<font color='#D859CD'>AiM: </font>" + "<font color='#ADEC00'>" + newmessage + "</font>");
             }
         }
@@ -73,9 +72,8 @@ namespace AiM.Utils
                 var newmessage = message;
                 for (var i = 0; i < @params.Count(); i++)
                 {
-                    newmessage.Replace("{" + i + "}", @params[i].ToString());
+                    newmessage = newmessage.Replace("{" + i + "}", @params[i].ToString());
                 }
-                message.Replace("{0}", @params[0].ToString());
                 Game.PrintChat("<font color='#D859CD'>AiM: </font>" + "<font color='#FF0000'>" + newmessage + "</font>");
             }
         }
