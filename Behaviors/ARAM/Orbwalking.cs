@@ -152,11 +152,11 @@ namespace AiM.Behaviors.ARAM
                 Vector3 pos;
                 if (minion == null)
                 {
-                    pos = EasyPositioning.GetPos().To3D();
+                    pos = new EasyPositioning().GetPos().To3D();
                 }
                 else
                 {
-                    pos = EasyPositioning.GetPos().To3D().Distance(minion.Position) < 1250 ? EasyPositioning.GetPos().To3D() : new Vector2(minion.ServerPosition.X + rInt, minion.ServerPosition.Y + rInt).To3D();
+                    pos = new EasyPositioning().GetPos().To3D().Distance(minion.Position) < 1250 ? new EasyPositioning().GetPos().To3D() : new Vector2(minion.ServerPosition.X + rInt, minion.ServerPosition.Y + rInt).To3D();
                 }
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
@@ -179,7 +179,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldFarm = new Conditional(
             () =>
             {
-                if (ObjectManager.Player.UnderTurret())
+                if (ObjectManager.Player.UnderTurret() && ObjectManager.Player.Distance(Wizard.GetFarthestAllyTurret()) < 800 && ObjectManager.Player.CountEnemiesInRange(1000) > 1)
                 {
                     return true;
                 }
@@ -201,7 +201,7 @@ namespace AiM.Behaviors.ARAM
             {
                 if (HeroManager.Enemies.Count == 0)
                 {return false;}
-                if (Positioning.GetAllyZone().Intersect(Positioning.GetEnemyZone()).Count() >= Positioning.GetAllyZone().Count / 3)
+                if (Positioning.AllyZone().Intersect(Positioning.EnemyZone()).Count() >= Positioning.AllyZone().Count / 3)
                 {
                     return true;
                 }
@@ -214,7 +214,7 @@ namespace AiM.Behaviors.ARAM
                     {
                         path.Add(new IntPoint(waypoint.X, waypoint.Y));
                     }
-                    if (Positioning.GetEnemyZone().Contains(path))
+                    if (Positioning.EnemyZone().Contains(path))
                     {
                         teamfightingAllies++;
                     }
@@ -229,8 +229,10 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional MixedConditional = new Conditional(
             () =>
             {
-                if (ShouldFarm.Tick() != BehaviorState.Success && ShouldGoToLane.Tick() != BehaviorState.Success &&
-                    ShouldPushLane.Tick() != BehaviorState.Success && ShouldTeamfight.Tick() != BehaviorState.Success)
+                if (HeroManager.Allies.Count == 0)
+                { return false; }
+                if (ShouldFarm.Tick() == BehaviorState.Failure && ShouldGoToLane.Tick() == BehaviorState.Failure &&
+                    ShouldPushLane.Tick() == BehaviorState.Failure && ShouldTeamfight.Tick() == BehaviorState.Failure)
                 {
                     return true;
                 }

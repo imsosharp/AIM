@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Behaviors\ARAM\Branch.cs" />
     <Compile Include="Plugins\Default.cs" />
+    <Compile Include="Utils\LevelSequences.cs" />
     <Compile Include="Utils\SpellCast.cs" />
     <Compile Include="Behaviors\Tree.cs" />
     <Compile Include="Behaviors\ARAM\Orbwalking.cs" />

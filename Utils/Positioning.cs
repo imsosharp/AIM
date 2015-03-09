@@ -37,22 +37,23 @@ using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 
 namespace AiM.Utils
 {
-    public static class EasyPositioning
+    public class EasyPositioning
     {
         /// <summary>
         /// Returns a random position in the team zone or the position of the ally champion farthest from base
         /// </summary>
-        internal static Vector2 GetPos()
+        internal Vector2 GetPos()
         {
             if (Game.MapId == GameMapId.HowlingAbyss)
             {
-                if (Positioning.GetAllyZone() != null)
+                var az = Positioning.AllyZone();
+                if (az != null)
                 {
                     //define the path lists we'll use to store positions
                     var allyZonePathList =
-                        Positioning.GetAllyZone().OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
+                        az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
                     var enemyZonePathList =
-                        Positioning.GetEnemyZone().OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
+                        az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
                     //create empty vector2 lists, we'll add vectors to it after performing additional checks.
                     var allyZoneVectorList = new List<Vector2>();
                     var enemyZoneVectorList = new List<Vector2>();
@@ -61,7 +62,7 @@ namespace AiM.Utils
                     foreach (var point in allyZonePathList)
                     {
                         var v2 = new Vector2(point.X, point.Y);
-                        if (!v2.IsWall())
+                        if (!v2.IsWall() && v2.Distance(HeadQuarters.AllyHQ.Position) > 2000)
                         {
                             allyZoneVectorList.Add(v2);
                         }
@@ -70,7 +71,7 @@ namespace AiM.Utils
                     var pointClosestToEnemyHQ =
                         allyZoneVectorList.OrderBy(p => p.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
 
-                    //remove people that just respawned from the equation
+                    //remove people that just respawned from the point list
                     foreach (var v2 in allyZoneVectorList)
                     {
                         if (v2.Distance(pointClosestToEnemyHQ) > 1500)
@@ -91,15 +92,15 @@ namespace AiM.Utils
         }   
     }
 
-    public static class Positioning
+    public class Positioning
     {
         /// <summary>
         /// Returns a list of points in the Ally Zone
         /// </summary>
-        internal static Paths GetAllyZone()
+        internal static Paths AllyZone()
         {
             var teamPolygons = new List<Geometry.Polygon>();
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsDead && !h.IsMe && !(h.InFountain() || h.InShop())))
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsDead && !h.IsMe && !h.InFountain()))
             {
                 teamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
             }
@@ -123,7 +124,7 @@ namespace AiM.Utils
         /// <summary>
         /// Returns a list of points in the Enemy Zone
         /// </summary>
-        internal static Paths GetEnemyZone()
+        internal static Paths EnemyZone()
         {
             var teamPolygons = new List<Geometry.Polygon>();
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().FindAll(h => !h.IsAlly && !h.IsDead && h.IsVisible))

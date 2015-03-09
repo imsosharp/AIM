@@ -42,8 +42,6 @@ namespace AiM
     {
         protected AiMPlugin()
         {
-            //start behaviors
-            CustomEvents.Game.OnGameLoad += load => { Behaviors.Tree.Root.Tick(); };
             //initialize menu
             CreateMenu();
             //initialize events

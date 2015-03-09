@@ -35,7 +35,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShoppingConditional = new Conditional(() => ObjectManager.Player.InFountain());
         internal static Inverter ShopppingInverter = new Inverter(new Conditional(() => ShoppingConditional.Tick() == BehaviorState.Failure));
         //#TODO Implement Shopping Logic
-        internal static BehaviorAction ShoppingAction = new BehaviorAction(() => Orbwalking.GoToLaneAction.Tick());
+        internal static BehaviorAction ShoppingAction = new BehaviorAction(() => Orbwalking.GoToLane.Tick());
         internal static Sequence ShoppingSequence = new Sequence(ShoppingConditional, ShopppingInverter, ShoppingAction);
 
     }

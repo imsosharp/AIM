@@ -54,6 +54,9 @@ namespace AiM
                         plugin = Type.GetType("AiM.Plugins.Default");
                     }
                     Activator.CreateInstance(plugin);
+                    //autolevel
+                    new AutoLevel(LevelSequences.GetSequence().Select(num => num - 1).ToArray());
+                    AutoLevel.Enable();
                 }
                 catch (Exception e)
                 {
