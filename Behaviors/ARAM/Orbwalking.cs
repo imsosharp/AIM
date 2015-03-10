@@ -180,7 +180,7 @@ namespace AiM.Behaviors.ARAM
             {
                 if (HeroManager.Enemies.Count == 0)
                 {return false;}
-                if (Positioning.AllyZone().Intersect(Positioning.EnemyZone()).Count() >= Positioning.AllyZone().Count / 3)
+                if (Positioning.AllyZone.Intersect(Positioning.EnemyZone).Count() >= Positioning.AllyZone.Count / 3)
                 {
                     return true;
                 }
@@ -193,7 +193,7 @@ namespace AiM.Behaviors.ARAM
                     {
                         path.Add(new IntPoint(waypoint.X, waypoint.Y));
                     }
-                    if (Positioning.EnemyZone().Contains(path))
+                    if (Positioning.EnemyZone.Contains(path))
                     {
                         teamfightingAllies++;
                     }
