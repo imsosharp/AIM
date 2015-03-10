@@ -70,12 +70,10 @@ namespace AiM.Utils
                     .FirstOrDefault();
         }
 
-        public static Obj_AI_Minion GetClosestEnemyMinion()
+        public static Obj_AI_Base GetClosestEnemyMinion()
         {
-            return ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(m => !m.IsAlly)
-                    .OrderBy(m => m.Distance(HeadQuarters.AllyHQ))
-                    .FirstOrDefault();
+            return MinionManager.GetMinions(float.MaxValue)
+                .OrderBy(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
         }
 
         public static int CountNearbyAllyMinions(this Obj_AI_Base x, int distance)

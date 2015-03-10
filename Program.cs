@@ -45,6 +45,7 @@ namespace AiM
             Console.Clear();
             CustomEvents.Game.OnGameLoad += load =>
             {
+                HeadQuarters.Update();
                 Helpers.Updater();
                 var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
                 try
@@ -66,6 +67,7 @@ namespace AiM
             Game.OnUpdate += tick =>
             {
                 EasyPositioning.Update();
+                Structures.UpdateAll();
                 Behaviors.Tree.Root.Tick();
             };
         }

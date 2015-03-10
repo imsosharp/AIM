@@ -54,24 +54,28 @@ namespace AiM.Utils
 
             if (Wizard.GetClosestEnemyMinion() != null && Positioning.ExpZone != null)
             {
-                var expPath =
-                    Positioning.ExpZone.OrderBy(
-                        pl => pl.OrderBy(p => new Vector2(p.X, p.Y).Distance(HeadQuarters.AllyHQ.Position)))
-                        .FirstOrDefault()
-                        .FirstOrDefault();
-                ExpRangePosition = new Vector2(expPath.X, expPath.Y);
+                var expPathList = new List<Vector2>();
+                foreach (var pathList in Positioning.ExpZone)
+                {
+                    foreach (var path in pathList)
+                    {
+                        expPathList.Add(new Vector2(path.X, path.Y));
+                    }
+                }
+                if (!expPathList.Any())
+                {
+                    return;
+                }
+                ExpRangePosition = expPathList.OrderBy(p => p.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
             }
 
-            if (Game.MapId == GameMapId.HowlingAbyss && ObjectManager.Get<Obj_AI_Hero>().Count(h => h.IsAlly && !h.IsMe) >= 1)
+            if (Game.MapId == GameMapId.HowlingAbyss && HeroManager.Allies.Count(h => !h.IsMe) >= 1)
                 {
-                    var az = Positioning.AllyZone;
-                    if (az != null)
-                    {
-                        //define the path lists we'll use to store positions
+                    //define the path lists we'll use to store positions
                         var allyZonePathList =
-                            az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
+                            Positioning.AllyZone.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
                         var enemyZonePathList =
-                            az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
+                            Positioning.EnemyZone.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
                         //create empty vector2 lists, we'll add vectors to it after performing additional checks.
                         var allyZoneVectorList = new List<Vector2>();
                         var enemyZoneVectorList = new List<Vector2>();
@@ -80,14 +84,14 @@ namespace AiM.Utils
                         foreach (var point in allyZonePathList)
                         {
                             var v2 = new Vector2(point.X, point.Y);
-                            if (!v2.IsWall() && v2.Distance(HeadQuarters.AllyHQ.Position) > 2000)
+                            if (!v2.IsWall())
                             {
                                 allyZoneVectorList.Add(v2);
                             }
                         }
 
                         var pointClosestToEnemyHQ =
-                            allyZoneVectorList.OrderBy(p => p.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
+                            allyZoneVectorList.OrderBy(v2 => v2.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
 
                         //remove people that just respawned from the point list
                         foreach (var v2 in allyZoneVectorList)
@@ -100,13 +104,20 @@ namespace AiM.Utils
 
                         //return a random orbwalk pos candidate from the list
                         TeamfightPosition = allyZoneVectorList.FirstOrDefault();
-                    }
-                    return;
+
+                        if (TeamfightPosition != null) {return;}
                 }
             //for SR :s
             var minion = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
-            var farthestTurretPos = ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault().Position.To2D();
-            TeamfightPosition = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurretPos;
+            var farthestTurret =
+                Turrets.AllyTurrets.OrderByDescending(t => t.Distance(HeadQuarters.AllyHQ))
+                    .FirstOrDefault();
+            if (farthestTurret == null) 
+            { 
+                Game.PrintChat("Couldn't find turrets in your game");
+                return;
+            }
+            TeamfightPosition = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurret.Position.To2D();
         }   
     }
 
@@ -134,7 +145,7 @@ namespace AiM.Utils
         {
             #region Ally Zone
             var allyTeamPolygons = new List<Geometry.Polygon>();
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsDead && !h.IsMe && !h.InFountain()))
+            foreach (var hero in HeroManager.Allies.Where(h => !h.IsDead && !h.IsMe && !h.InFountain()))
             {
                 allyTeamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
             }
@@ -156,7 +167,7 @@ namespace AiM.Utils
             #region Enemy Zone
             
             var enemyTeamPolygons = new List<Geometry.Polygon>();
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().FindAll(h => !h.IsAlly && !h.IsDead && h.IsVisible))
+            foreach (var hero in HeroManager.Enemies.FindAll(h => !h.IsDead && h.IsVisible))
             {
                 enemyTeamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
             }
@@ -178,7 +189,7 @@ namespace AiM.Utils
             #region ExpZone
             if (Wizard.GetClosestEnemyMinion() != null && Wizard.GetClosestEnemyMinion().IsVisible && !Wizard.GetClosestEnemyMinion().IsDead && Wizard.GetClosestEnemyMinion().IsValid<Obj_AI_Minion>())
             {
-                var expRangeCircle = new Geometry.Circle(Wizard.GetClosestEnemyMinion().Position.To2D(), 1350);
+                var expRangeCircle = new Geometry.Circle(Wizard.GetClosestEnemyMinion().ServerPosition.To2D(), 1350);
                 ExpZone.Add(expRangeCircle.ToPolygon().ToClipperPath());
 
                 //remove walls
