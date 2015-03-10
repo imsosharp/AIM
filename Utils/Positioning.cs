@@ -37,16 +37,19 @@ using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 
 namespace AiM.Utils
 {
-    public class EasyPositioning
+    public static class EasyPositioning
     {
+
+        internal static Vector2 Position { get; set; }
+
         /// <summary>
         /// Returns a random position in the team zone or the position of the ally champion farthest from base
         /// </summary>
-        internal Vector2 GetPos()
+        internal static void Update()
         {
             if (Game.MapId == GameMapId.HowlingAbyss)
             {
-                var az = Positioning.AllyZone();
+                var az = Positioning.AllyZone;
                 if (az != null)
                 {
                     //define the path lists we'll use to store positions
@@ -81,32 +84,44 @@ namespace AiM.Utils
                     }
 
                     //return a random orbwalk pos candidate from the list
-                    return allyZoneVectorList.FirstOrDefault();
+                    Position = allyZoneVectorList.FirstOrDefault();
+                    return;
                 }
             }
 
             //for SR :s
             var minion = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
             var farthestTurretPos = ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault().Position.To2D();
-            return (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurretPos;
+            Position = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurretPos;
         }   
     }
 
-    public class Positioning
+    public static class Positioning
     {
         /// <summary>
         /// Returns a list of points in the Ally Zone
         /// </summary>
-        internal static Paths AllyZone()
+        internal static Paths AllyZone { get; set; }
+
+        /// <summary>
+        /// Returns a list of points in the Enemy Zone
+        /// </summary>
+        internal static Paths EnemyZone { get; set; }
+
+        /// <summary>
+        /// Updates positioning props
+        /// </summary>
+        internal static void Update()
         {
-            var teamPolygons = new List<Geometry.Polygon>();
+            #region Ally Zone
+            var allyTeamPolygons = new List<Geometry.Polygon>();
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsDead && !h.IsMe && !h.InFountain()))
             {
-                teamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
+                allyTeamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
             }
-            var teamPaths = Geometry.ClipPolygons(teamPolygons);
-            var newTeamPaths = teamPaths;
-            foreach (var pathList in teamPaths)
+            var allyTeamPaths = Geometry.ClipPolygons(allyTeamPolygons);
+            var newAllyTeamPaths = allyTeamPaths;
+            foreach (var pathList in allyTeamPaths)
             {
                 Path wall = new Path();
                 foreach (var path in pathList)
@@ -116,24 +131,21 @@ namespace AiM.Utils
                         wall.Add(path);
                     }
                 }
-                newTeamPaths.Remove(wall);
+                newAllyTeamPaths.Remove(wall);
             }
-            return newTeamPaths;
-        }
+            AllyZone = newAllyTeamPaths;
+#endregion Ally Zone
 
-        /// <summary>
-        /// Returns a list of points in the Enemy Zone
-        /// </summary>
-        internal static Paths EnemyZone()
-        {
-            var teamPolygons = new List<Geometry.Polygon>();
+            #region Enemy Zone
+            
+            var enemyTeamPolygons = new List<Geometry.Polygon>();
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().FindAll(h => !h.IsAlly && !h.IsDead && h.IsVisible))
             {
-                teamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
+                enemyTeamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
             }
-            var teamPaths = Geometry.ClipPolygons(teamPolygons);
-            var newTeamPaths = teamPaths;
-            foreach (var pathList in teamPaths)
+            var enemyTeamPaths = Geometry.ClipPolygons(enemyTeamPolygons);
+            var newEnemyTeamPaths = enemyTeamPaths;
+            foreach (var pathList in enemyTeamPaths)
             {
                 Path wall = new Path();
                 foreach (var path in pathList)
@@ -143,9 +155,10 @@ namespace AiM.Utils
                         wall.Add(path);
                     }
                 }
-                newTeamPaths.Remove(wall);
+                newEnemyTeamPaths.Remove(wall);
             }
-            return newTeamPaths;
+            EnemyZone = newEnemyTeamPaths;
+#endregion Enemy Zone
         }
 
         /// <summary>

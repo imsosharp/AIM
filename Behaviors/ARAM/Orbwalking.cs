@@ -45,11 +45,7 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction PushLaneAction = new BehaviorAction(
             () =>
             {
-                Drawing.OnDraw += d =>
-                {
-                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Push lane");
-                };
-                if (ObjectManager.Player.UnderTurret() && ObjectManager.Player.ServerPosition.CountEnemiesInRange(800) <= 2)
+                if (ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.ServerPosition.CountEnemiesInRange(800) <= 2)
                 {
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                     AiMPlugin.Orbwalker.ForceTarget(ObjectManager.Player.ServerPosition.GetClosestEnemyTurret());
@@ -74,10 +70,6 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction TeamfightAction = new BehaviorAction(
             () =>
             {
-                Drawing.OnDraw += d =>
-                {
-                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Teamfight");
-                };
                 if (ObjectManager.Player.IsMelee())
                 {
                     var target = AiMPlugin.GetMeleeTarget();
@@ -92,13 +84,12 @@ namespace AiM.Behaviors.ARAM
                 }
                 else
                 {
-                    var def = (ObjectManager.Player.AttackRange - new Random(Environment.TickCount).Next(20, 70)) * Wizard.GetDefensiveMultiplier();
+                    //var def = (ObjectManager.Player.AttackRange - new Random(Environment.TickCount).Next(20, 70)) * Wizard.GetDefensiveMultiplier();
                     var target = AiMPlugin.GetTarget(
                         ObjectManager.Player.AttackRange, TargetSelector.DamageType.Physical);
                     AiMPlugin.Orbwalker.ForceTarget(target);
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Combo;
-                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(
-                        new Vector2(target.ServerPosition.X + def, target.ServerPosition.Y + def).To3D());
+                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(EasyPositioning.Position.To3D());
                     return BehaviorState.Success;
                 }
             });
@@ -106,10 +97,6 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction GoToLaneAction = new BehaviorAction(
             () =>
             {
-                Drawing.OnDraw += d =>
-                {
-                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Go To Lane");
-                };
                 var turret = Wizard.GetFarthestAllyTurret();
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
                 var pos = new Vector2(turret.Position.X + rInt, turret.Position.Y + rInt).To3D();
@@ -129,10 +116,6 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction FarmAction = new BehaviorAction(
             () =>
             {
-                Drawing.OnDraw += d =>
-                {
-                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Farm");
-                };
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
                 var pos = new Vector2(ObjectManager.Player.ServerPosition.X + rInt, ObjectManager.Player.Position.Y + rInt).To3D();
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
@@ -143,20 +126,16 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction MixedAction = new BehaviorAction(
             () =>
             {
-                Drawing.OnDraw += d =>
-                {
-                    Drawing.DrawText(ObjectManager.Player.HPBarPosition.X, ObjectManager.Player.HPBarPosition.Y, Color.AliceBlue, "Mixed");
-                };
                 var minion = Wizard.GetClosestEnemyMinion();
                 var rInt = new Random().Next(650, 1100) * Wizard.GetDefensiveMultiplier();
                 Vector3 pos;
                 if (minion == null)
                 {
-                    pos = new EasyPositioning().GetPos().To3D();
+                    pos = EasyPositioning.Position.To3D();
                 }
                 else
                 {
-                    pos = new EasyPositioning().GetPos().To3D().Distance(minion.Position) < 1250 ? new EasyPositioning().GetPos().To3D() : new Vector2(minion.ServerPosition.X + rInt, minion.ServerPosition.Y + rInt).To3D();
+                    pos = EasyPositioning.Position.To3D();
                 }
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
