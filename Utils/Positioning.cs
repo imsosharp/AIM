@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
@@ -40,59 +41,72 @@ namespace AiM.Utils
     public static class EasyPositioning
     {
 
-        internal static Vector2 Position { get; set; }
+        internal static Vector2 TeamfightPosition { get; set; }
+        internal static Vector2 ExpRangePosition { get; set; }
+
 
         /// <summary>
         /// Returns a random position in the team zone or the position of the ally champion farthest from base
         /// </summary>
         internal static void Update()
         {
-            if (Game.MapId == GameMapId.HowlingAbyss)
+            Positioning.Update();
+
+            if (Wizard.GetClosestEnemyMinion() != null && Positioning.ExpZone != null)
             {
-                var az = Positioning.AllyZone;
-                if (az != null)
-                {
-                    //define the path lists we'll use to store positions
-                    var allyZonePathList =
-                        az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
-                    var enemyZonePathList =
-                        az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
-                    //create empty vector2 lists, we'll add vectors to it after performing additional checks.
-                    var allyZoneVectorList = new List<Vector2>();
-                    var enemyZoneVectorList = new List<Vector2>();
-
-                    //create vectors from points and remove walls.
-                    foreach (var point in allyZonePathList)
-                    {
-                        var v2 = new Vector2(point.X, point.Y);
-                        if (!v2.IsWall() && v2.Distance(HeadQuarters.AllyHQ.Position) > 2000)
-                        {
-                            allyZoneVectorList.Add(v2);
-                        }
-                    }
-
-                    var pointClosestToEnemyHQ =
-                        allyZoneVectorList.OrderBy(p => p.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
-
-                    //remove people that just respawned from the point list
-                    foreach (var v2 in allyZoneVectorList)
-                    {
-                        if (v2.Distance(pointClosestToEnemyHQ) > 1500)
-                        {
-                            allyZoneVectorList.Remove(v2);
-                        }
-                    }
-
-                    //return a random orbwalk pos candidate from the list
-                    Position = allyZoneVectorList.FirstOrDefault();
-                    return;
-                }
+                var expPath =
+                    Positioning.ExpZone.OrderBy(
+                        pl => pl.OrderBy(p => new Vector2(p.X, p.Y).Distance(HeadQuarters.AllyHQ.Position)))
+                        .FirstOrDefault()
+                        .FirstOrDefault();
+                ExpRangePosition = new Vector2(expPath.X, expPath.Y);
             }
 
+            if (Game.MapId == GameMapId.HowlingAbyss && ObjectManager.Get<Obj_AI_Hero>().Count(h => h.IsAlly && !h.IsMe) >= 1)
+                {
+                    var az = Positioning.AllyZone;
+                    if (az != null)
+                    {
+                        //define the path lists we'll use to store positions
+                        var allyZonePathList =
+                            az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
+                        var enemyZonePathList =
+                            az.OrderBy(p => new Random(Environment.TickCount).Next()).FirstOrDefault();
+                        //create empty vector2 lists, we'll add vectors to it after performing additional checks.
+                        var allyZoneVectorList = new List<Vector2>();
+                        var enemyZoneVectorList = new List<Vector2>();
+
+                        //create vectors from points and remove walls.
+                        foreach (var point in allyZonePathList)
+                        {
+                            var v2 = new Vector2(point.X, point.Y);
+                            if (!v2.IsWall() && v2.Distance(HeadQuarters.AllyHQ.Position) > 2000)
+                            {
+                                allyZoneVectorList.Add(v2);
+                            }
+                        }
+
+                        var pointClosestToEnemyHQ =
+                            allyZoneVectorList.OrderBy(p => p.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
+
+                        //remove people that just respawned from the point list
+                        foreach (var v2 in allyZoneVectorList)
+                        {
+                            if (v2.Distance(pointClosestToEnemyHQ) > 1500)
+                            {
+                                allyZoneVectorList.Remove(v2);
+                            }
+                        }
+
+                        //return a random orbwalk pos candidate from the list
+                        TeamfightPosition = allyZoneVectorList.FirstOrDefault();
+                    }
+                    return;
+                }
             //for SR :s
             var minion = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
             var farthestTurretPos = ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault().Position.To2D();
-            Position = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurretPos;
+            TeamfightPosition = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurretPos;
         }   
     }
 
@@ -101,12 +115,17 @@ namespace AiM.Utils
         /// <summary>
         /// Returns a list of points in the Ally Zone
         /// </summary>
-        internal static Paths AllyZone { get; set; }
+        public static Paths AllyZone { get; private set; }
 
         /// <summary>
         /// Returns a list of points in the Enemy Zone
         /// </summary>
-        internal static Paths EnemyZone { get; set; }
+        public static Paths EnemyZone { get; private set; }
+
+        /// <summary>
+        /// Returns a pathlist of the zone in which you will get exp, not sure if it will ever be used.
+        /// </summary>
+        public static Paths ExpZone { get; private set; }
 
         /// <summary>
         /// Updates positioning props
@@ -119,9 +138,8 @@ namespace AiM.Utils
             {
                 allyTeamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
             }
-            var allyTeamPaths = Geometry.ClipPolygons(allyTeamPolygons);
-            var newAllyTeamPaths = allyTeamPaths;
-            foreach (var pathList in allyTeamPaths)
+            AllyZone = Geometry.ClipPolygons(allyTeamPolygons);
+            foreach (var pathList in AllyZone)
             {
                 Path wall = new Path();
                 foreach (var path in pathList)
@@ -131,10 +149,9 @@ namespace AiM.Utils
                         wall.Add(path);
                     }
                 }
-                newAllyTeamPaths.Remove(wall);
+                AllyZone.Remove(wall);
             }
-            AllyZone = newAllyTeamPaths;
-#endregion Ally Zone
+            #endregion Ally Zone
 
             #region Enemy Zone
             
@@ -143,22 +160,45 @@ namespace AiM.Utils
             {
                 enemyTeamPolygons.Add(GetChampionRangeCircle(hero).ToPolygon());
             }
-            var enemyTeamPaths = Geometry.ClipPolygons(enemyTeamPolygons);
-            var newEnemyTeamPaths = enemyTeamPaths;
-            foreach (var pathList in enemyTeamPaths)
+            EnemyZone = Geometry.ClipPolygons(enemyTeamPolygons);
+            foreach (var pathList in EnemyZone)
             {
                 Path wall = new Path();
                 foreach (var path in pathList)
                 {
-                    if (Utility.IsWall(new Vector2(path.X, path.Y)))
+                    if ((new Vector2(path.X, path.Y)).IsWall())
                     {
                         wall.Add(path);
                     }
                 }
-                newEnemyTeamPaths.Remove(wall);
+                EnemyZone.Remove(wall);
             }
-            EnemyZone = newEnemyTeamPaths;
-#endregion Enemy Zone
+            #endregion Enemy Zone
+
+            #region ExpZone
+            if (Wizard.GetClosestEnemyMinion() != null && Wizard.GetClosestEnemyMinion().IsVisible && !Wizard.GetClosestEnemyMinion().IsDead && Wizard.GetClosestEnemyMinion().IsValid<Obj_AI_Minion>())
+            {
+                var expRangeCircle = new Geometry.Circle(Wizard.GetClosestEnemyMinion().Position.To2D(), 1350);
+                ExpZone.Add(expRangeCircle.ToPolygon().ToClipperPath());
+
+                //remove walls
+                foreach (var path in ExpZone)
+                {
+                    foreach (var point in path)
+                    {
+                        if (new Vector2(point.X, point.Y).IsWall())
+                        {
+                            path.Remove(point);
+                        }
+                    }
+                    if (path.Count == 0)
+                    {
+                        ExpZone.Remove(path);
+                    }
+                }
+                ExpZone = ExpZone;
+            }
+            #endregion ExpZone
         }
 
         /// <summary>
@@ -183,48 +223,5 @@ namespace AiM.Utils
             }
             return new Geometry.Circle(hero.ServerPosition.To2D(), hero.AttackRange);
         }
-
-        /// <summary>
-        /// Returns a pathlist of the zone in which you will get exp, not sure if it will ever be used.
-        /// </summary>
-        internal static Paths ExpZone()
-        {
-            //define the minions
-            var farthestAllyMinion = 
-                ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
-            var closestEnemyMinion =
-                ObjectManager.Get<Obj_AI_Minion>().Where(m => !m.IsAlly).OrderBy(m => m.Distance(HeadQuarters.AllyHQ)).FirstOrDefault();
-
-            //create a new empty path list to which we're going to add paths later on
-            var paths = new Paths();
-
-            //create a circle to of the exp range
-
-
-            //if there's an enemy minion visible, we're going to use it
-            if (closestEnemyMinion != null && closestEnemyMinion.IsVisible && !closestEnemyMinion.IsDead && closestEnemyMinion.IsValid<Obj_AI_Minion>())
-            {
-                var expRangeCircle = new Geometry.Circle(closestEnemyMinion.Position.To2D(), 1350);
-                paths.Add(expRangeCircle.ToPolygon().ToClipperPath());
-
-                //remove walls
-                foreach (var path in paths)
-                {
-                    foreach (var point in path)
-                    {
-                        if (new Vector2(point.X, point.Y).IsWall())
-                        {
-                            path.Remove(point);
-                        }
-                    }
-                    if (path.Count == 0)
-                    {
-                        paths.Remove(path);
-                    }
-                }
-            }
-            return paths;
-        }
-
     }
 }

@@ -89,7 +89,7 @@ namespace AiM.Behaviors.ARAM
                         ObjectManager.Player.AttackRange, TargetSelector.DamageType.Physical);
                     AiMPlugin.Orbwalker.ForceTarget(target);
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Combo;
-                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(EasyPositioning.Position.To3D());
+                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(EasyPositioning.TeamfightPosition.To3D());
                     return BehaviorState.Success;
                 }
             });
@@ -131,11 +131,11 @@ namespace AiM.Behaviors.ARAM
                 Vector3 pos;
                 if (minion == null)
                 {
-                    pos = EasyPositioning.Position.To3D();
+                    pos = EasyPositioning.TeamfightPosition.To3D();
                 }
                 else
                 {
-                    pos = EasyPositioning.Position.To3D();
+                    pos = EasyPositioning.TeamfightPosition.To3D();
                 }
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);

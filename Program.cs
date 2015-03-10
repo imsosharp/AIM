@@ -65,7 +65,6 @@ namespace AiM
             };
             Game.OnUpdate += tick =>
             {
-                Positioning.Update();
                 EasyPositioning.Update();
                 Behaviors.Tree.Root.Tick();
             };

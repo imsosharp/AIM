@@ -64,8 +64,7 @@ namespace AiM.Utils
 
         public static Obj_AI_Minion GetFarthestMinionOnLane(Vector3 lanepos)
         {
-            return
-                ObjectManager.Get<Obj_AI_Minion>()
+            return ObjectManager.Get<Obj_AI_Minion>()
                     .Where(m => m.IsAlly)
                     .OrderBy(m => GetClosestEnemyTurret(lanepos))
                     .FirstOrDefault();
@@ -73,12 +72,10 @@ namespace AiM.Utils
 
         public static Obj_AI_Minion GetClosestEnemyMinion()
         {
-            var minion =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(m => !m.IsAlly && m.IsValid<Obj_AI_Minion>() && !m.IsHeroPet())
-                    .OrderBy(m => m.Distance(ObjectManager.Player))
+            return ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(m => !m.IsAlly)
+                    .OrderBy(m => m.Distance(HeadQuarters.AllyHQ))
                     .FirstOrDefault();
-            return minion;
         }
 
         public static int CountNearbyAllyMinions(this Obj_AI_Base x, int distance)
