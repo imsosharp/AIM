@@ -72,6 +72,11 @@ namespace AiM.Utils
         /// </summary>
         public static void Update()
         {
+            if (AllyHQ == null)
+                AllyHQ = new Obj_HQ();
+            if (EnemyHQ == null)
+                EnemyHQ = new Obj_HQ();
+
             AllyHQ = ObjectManager.Get<Obj_HQ>().FirstOrDefault(hq => hq.IsAlly);
             EnemyHQ = ObjectManager.Get<Obj_HQ>().FirstOrDefault(hq => !hq.IsAlly);
         }
@@ -97,6 +102,11 @@ namespace AiM.Utils
         /// </summary>
         public static void Update()
         {
+            if (AllyTurrets == null)
+                AllyTurrets = new List<Obj_AI_Turret>();
+            if (EnemyTurrets == null)
+                EnemyTurrets = new List<Obj_AI_Turret>();
+
             AllyTurrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsAlly).ToList();
             EnemyTurrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => !t.IsAlly).ToList();
         }

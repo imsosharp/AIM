@@ -42,78 +42,53 @@ namespace AiM.Utils
     {
         public static Obj_AI_Turret GetClosestEnemyTurret(this Vector3 point)
         {
-            var turrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => !t.IsAlly);
-            return turrets.OrderBy(t => t.Distance(point)).FirstOrDefault();
+            return Turrets.EnemyTurrets.OrderBy(t => t.Distance(point)).FirstOrDefault();
         }
 
         public static Obj_AI_Turret GetFarthestAllyTurret()
         {
-            var turrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsAlly);
-            var nexus = ObjectManager.Get<Obj_HQ>().FirstOrDefault(hq => hq.IsAlly);
-            return turrets.OrderByDescending(t => t.Distance(nexus != null ? nexus.Position : ObjectManager.Player.ServerPosition)).FirstOrDefault();
+            return Turrets.AllyTurrets.OrderByDescending(t => t.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
         }
 
         public static Obj_AI_Minion GetFarthestMinion()
         {
-            return
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(m => m.IsAlly)
-                    .OrderBy(m => GetClosestEnemyTurret(m.Position))
-                    .FirstOrDefault();
+            return Minions.AllyMinions.OrderBy(m => m.Distance(GetClosestEnemyTurret(HeadQuarters.AllyHQ.Position))).FirstOrDefault();
         }
 
         public static Obj_AI_Minion GetFarthestMinionOnLane(Vector3 lanepos)
         {
-            return ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(m => m.IsAlly)
-                    .OrderBy(m => GetClosestEnemyTurret(lanepos))
-                    .FirstOrDefault();
+            return Minions.AllyMinions.OrderBy(m => m.Distance(GetClosestEnemyTurret(lanepos))).FirstOrDefault();
         }
 
         public static Obj_AI_Base GetClosestEnemyMinion()
         {
-            return MinionManager.GetMinions(float.MaxValue)
-                .OrderBy(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
+            return Minions.EnemyMinions.OrderBy(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
         }
 
         public static int CountNearbyAllyMinions(this Obj_AI_Base x, int distance)
         {
-            return
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Count(minion => minion.IsAlly && !minion.IsDead && minion.Distance(x) < distance);
+            return Minions.AllyMinions.Count(minion => minion.Distance(x) < distance);
         }
 
         public static int CountNearbyAllies(this Obj_AI_Base x, int distance)
         {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.IsAlly && !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
+            return Heroes.AllyHeroes.Count(hero => !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
         }
 
         public static int CountNearbyAllies(this Vector3 x, int distance)
         {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.IsAlly && !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
+            return Heroes.AllyHeroes.Count( hero => !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
         }
 
         public static int CountNearbyEnemies(this Vector3 x, int distance)
         {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            !hero.IsAlly && !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
+            return Heroes.EnemyHeroes.Count(hero => !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
         }
 
         public static bool IsHeroPet(this Obj_AI_Minion minion)
         {
             var mn = minion.BaseSkinName;
-            if (mn.Contains("teemo") || mn.Contains("shroom") || mn.Contains("turret"))
+            if (mn.Contains("teemo") || mn.Contains("shroom") || mn.Contains("turret") || mn.Contains("clone"))
             {
                 return true;
             }
