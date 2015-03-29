@@ -45,23 +45,13 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction PushLaneAction = new BehaviorAction(
             () =>
             {
-                if (ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.ServerPosition.CountEnemiesInRange(800) <= 2)
-                {
-                    AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
-                    AiMPlugin.Orbwalker.ForceTarget(ObjectManager.Player.ServerPosition.GetClosestEnemyTurret());
-                }
                 var followminion = Wizard.GetFarthestMinion();
                 var randomDist = new Random(Environment.TickCount).Next(-250, +250);
                 if (followminion != null && followminion.IsValid && !followminion.IsDead && !followminion.IsHeroPet())
                 {
                     AiMPlugin.Orbwalker.SetOrbwalkingPoint(
-                        new Vector2(followminion.Position.X + randomDist, followminion.ServerPosition.Y + randomDist)
-                            .To3D());
-                    if (ObjectManager.Player.ServerPosition.CountEnemiesInRange(800) == 0)
-                    {
-                        AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
-                    }
-                    AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
+                        new Vector2(followminion.Position.X + randomDist, followminion.ServerPosition.Y + randomDist).To3D());
+                    AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                     return BehaviorState.Success;
                 }
                 return BehaviorState.Failure;
@@ -84,12 +74,13 @@ namespace AiM.Behaviors.ARAM
                 }
                 else
                 {
-                    //var def = (ObjectManager.Player.AttackRange - new Random(Environment.TickCount).Next(20, 70)) * Wizard.GetDefensiveMultiplier();
+                    var def = (ObjectManager.Player.AttackRange - (new Random(Environment.TickCount).Next(50, 100)) * Wizard.GetDefensiveMultiplier());
+                    var orbPos = new Vector2(EasyPositioning.TeamfightPosition.X + def, EasyPositioning.TeamfightPosition.Y + def).To3D();
                     var target = AiMPlugin.GetTarget(
                         ObjectManager.Player.AttackRange, TargetSelector.DamageType.Physical);
                     AiMPlugin.Orbwalker.ForceTarget(target);
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Combo;
-                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(EasyPositioning.TeamfightPosition.To3D());
+                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(orbPos);
                     return BehaviorState.Success;
                 }
             });

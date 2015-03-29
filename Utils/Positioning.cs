@@ -39,7 +39,7 @@ namespace AiM.Utils
 {
     public static class EasyPositioning
     {
-
+        private static int LastUpdate = 0;
         public static Vector2 TeamfightPosition { get; private set; }
         public static Vector2 ExpRangePosition { get; private set; }
 
@@ -49,44 +49,48 @@ namespace AiM.Utils
         /// </summary>
         internal static void Update()
         {
-            Positioning.Update();
-            var curpos = ObjectManager.Player.ServerPosition;
-            if (TeamfightPosition == null)
-                TeamfightPosition = new Vector2(curpos.X, curpos.Y);
-            if (ExpRangePosition == null)
-                ExpRangePosition = new Vector2(curpos.X, curpos.Y);
+            if (Environment.TickCount - LastUpdate >= 500)
+            {
+                LastUpdate = Environment.TickCount;
+                Positioning.Update();
+                var curpos = ObjectManager.Player.ServerPosition;
+                if (TeamfightPosition == null)
+                    TeamfightPosition = new Vector2(curpos.X, curpos.Y);
+                if (ExpRangePosition == null)
+                    ExpRangePosition = new Vector2(curpos.X, curpos.Y);
 
-            ExpRangePosition =
-                Positioning.ExpZone.OrderBy(p => p.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
+                ExpRangePosition =
+                    Positioning.ExpZone.OrderBy(p => p.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
 
-            if (Game.MapId == GameMapId.HowlingAbyss && HeroManager.Allies.Count(h => !h.IsMe) >= 1)
+                if (Game.MapId == GameMapId.HowlingAbyss && HeroManager.Allies.Count(h => !h.IsMe) >= 1)
                 {
-                var pointClosestToEnemyHQ =
-                            Positioning.AllyZone.OrderBy(v2 => v2.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
-                var positioningCandidates = new List<Vector2>();
-                        //remove people that just respawned from the point list
-                        foreach (var v2 in Positioning.AllyZone)
+                    var pointClosestToEnemyHQ =
+                                Positioning.AllyZone.OrderBy(v2 => v2.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
+                    var positioningCandidates = new List<Vector2>();
+                    //remove people that just respawned from the point list
+                    foreach (var v2 in Positioning.AllyZone)
+                    {
+                        if (!(v2.Distance(pointClosestToEnemyHQ) > 1500))
                         {
-                            if (!(v2.Distance(pointClosestToEnemyHQ) > 1500))
-                            {
-                                positioningCandidates.Add(v2);
-                            }
+                            positioningCandidates.Add(v2);
                         }
+                    }
 
-                        //return a random orbwalk pos candidate from the list
-                        TeamfightPosition = positioningCandidates
-                            .OrderBy(p => new Random(Environment.TickCount).Next())
-                                .FirstOrDefault();
+                    //return a random orbwalk pos candidate from the list
+                    TeamfightPosition = positioningCandidates
+                        .OrderBy(p => new Random(Environment.TickCount).Next())
+                            .FirstOrDefault();
 
-                        if (TeamfightPosition.IsValid()) {return;}
-                 }
-            //for SR :s
-            var minion = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
-            var farthestTurret =
-                Turrets.AllyTurrets.OrderByDescending(t => t.Distance(HeadQuarters.AllyHQ))
-                    .FirstOrDefault();
-            TeamfightPosition = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurret.Position.To2D();
-        }   
+                    if (TeamfightPosition.IsValid()) { return; }
+                }
+                //for SR :s
+                var minion = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
+                var farthestTurret =
+                    Turrets.AllyTurrets.OrderByDescending(t => t.Distance(HeadQuarters.AllyHQ))
+                        .FirstOrDefault();
+                TeamfightPosition = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurret.Position.To2D();
+            }
+        }
     }
 
     public static class Positioning

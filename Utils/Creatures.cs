@@ -46,7 +46,6 @@ namespace AiM.Utils
             {
                 Minions.Update();
                 Heroes.Update();
-                Pets.Update();
                 LastUpdate = Environment.TickCount;
             }
         }
@@ -54,13 +53,15 @@ namespace AiM.Utils
 
     public static class Minions
     {
-        public static List<Obj_AI_Minion> AllyMinions { get; private set; }
-        public static List<Obj_AI_Minion> EnemyMinions { get; private set; }
+        public static List<Obj_AI_Base> AllyMinions { get; private set; }
+        public static List<Obj_AI_Base> EnemyMinions { get; private set; }
+        public static List<Obj_AI_Base> ClosestAllyMinions { get; private set; }
 
         public static void Update()
         {
-            AllyMinions = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsAlly && !m.IsDead && !m.IsHeroPet()).ToList();
-            EnemyMinions = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet()).ToList();
+            AllyMinions = MinionManager.GetMinions(int.MaxValue).FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet());
+            EnemyMinions = MinionManager.GetMinions(int.MaxValue).FindAll(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet());
+            ClosestAllyMinions = MinionManager.GetMinions(2000).FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet());
         }
     }
 
@@ -73,18 +74,6 @@ namespace AiM.Utils
         {
             AllyHeroes = HeroManager.Allies;
             EnemyHeroes = HeroManager.Enemies;
-        }
-    }
-
-    public static class Pets
-    {
-        public static List<Obj_AI_Minion> AllyPets { get; private set; }
-        public static List<Obj_AI_Minion> EnemyPets { get; private set; }
-
-        public static void Update()
-        {
-            AllyPets = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsAlly && m.IsHeroPet() && !m.IsDead).ToList();
-            EnemyPets = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget() && !m.IsDead && m.IsHeroPet()).ToList();
         }
     }
 }

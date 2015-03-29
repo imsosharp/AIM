@@ -52,12 +52,12 @@ namespace AiM.Utils
 
         public static Obj_AI_Minion GetFarthestMinion()
         {
-            return Minions.AllyMinions.OrderBy(m => m.Distance(GetClosestEnemyTurret(HeadQuarters.AllyHQ.Position))).FirstOrDefault();
+            return (Obj_AI_Minion)Minions.AllyMinions.OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
         }
 
         public static Obj_AI_Minion GetFarthestMinionOnLane(Vector3 lanepos)
         {
-            return Minions.AllyMinions.OrderBy(m => m.Distance(GetClosestEnemyTurret(lanepos))).FirstOrDefault();
+            return (Obj_AI_Minion)Minions.AllyMinions.OrderByDescending(m => m.Distance(lanepos)).FirstOrDefault();
         }
 
         public static Obj_AI_Base GetClosestEnemyMinion()
@@ -67,12 +67,17 @@ namespace AiM.Utils
 
         public static int CountNearbyAllyMinions(this Obj_AI_Base x, int distance)
         {
+            return Minions.AllyMinions.Count(minion => minion.Distance(x.ServerPosition) < distance);
+        }
+
+        public static int CountNearbyAllyMinions(this Vector3 x, int distance)
+        {
             return Minions.AllyMinions.Count(minion => minion.Distance(x) < distance);
         }
 
         public static int CountNearbyAllies(this Obj_AI_Base x, int distance)
         {
-            return Heroes.AllyHeroes.Count(hero => !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
+            return Heroes.AllyHeroes.Count(hero => !hero.IsDead && !hero.IsMe && hero.Distance(x.ServerPosition) < distance);
         }
 
         public static int CountNearbyAllies(this Vector3 x, int distance)
@@ -85,10 +90,10 @@ namespace AiM.Utils
             return Heroes.EnemyHeroes.Count(hero => !hero.IsDead && !hero.IsMe && hero.Distance(x) < distance);
         }
 
-        public static bool IsHeroPet(this Obj_AI_Minion minion)
+        public static bool IsHeroPet(this Obj_AI_Base minion)
         {
             var mn = minion.BaseSkinName;
-            if (mn.Contains("teemo") || mn.Contains("shroom") || mn.Contains("turret") || mn.Contains("clone"))
+            if (mn.Contains("teemo") || mn.Contains("shroom") || mn.Contains("turret") || mn.Contains("clone") || mn.Contains("blanc"))
             {
                 return true;
             }

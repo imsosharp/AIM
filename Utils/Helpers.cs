@@ -49,6 +49,7 @@ namespace AiM.Utils
             if (!@params.Any())
             {
                 Game.PrintChat("<font color='#D859CD'>AiM: </font>" + "<font color='#ADEC00'>" + message + "</font>");
+                new Notification("<font color='#D859CD'>AiM: </font>" + "<font color='#ADEC00'>" + message + "</font>", 6000, true);
             }
             else
             {
@@ -58,6 +59,7 @@ namespace AiM.Utils
                     newmessage = newmessage.Replace("{" + i + "}", @params[i].ToString());
                 }
                 Game.PrintChat("<font color='#D859CD'>AiM: </font>" + "<font color='#ADEC00'>" + newmessage + "</font>");
+                new Notification("<font color='#D859CD'>AiM: </font>" + "<font color='#ADEC00'>" + newmessage + "</font>", 6000, true);
             }
         }
 
@@ -66,6 +68,7 @@ namespace AiM.Utils
             if (!@params.Any())
             {
                 Game.PrintChat("<font color='#D859CD'>AiM: </font>" + "<font color='FF0000'>" + message + "</font>");
+                new Notification("<font color='#D859CD'>AiM: </font>" + "<font color='FF0000'>" + message + "</font>", 6000, true);
             }
             else
             {

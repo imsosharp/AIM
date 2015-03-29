@@ -98,12 +98,24 @@ namespace AiM.Utils
         public static List<Obj_AI_Turret> EnemyTurrets { get; private set; }
 
         /// <summary>
+        /// Closest Ally Turret
+        /// </summary>
+        public static Obj_AI_Turret ClosestAllyTurret { get; private set; }
+
+        /// <summary>
+        /// Closest Enemy Turret
+        /// </summary>
+        public static Obj_AI_Turret ClosestEnemyTurret { get; private set; }
+
+        /// <summary>
         /// A function used to update all turrets
         /// </summary>
         public static void Update()
         {
-            AllyTurrets = ObjectHandler.Get<Obj_AI_Turret>().Where(t => t.IsAlly).ToList();
-            EnemyTurrets = ObjectHandler.Get<Obj_AI_Turret>().Where(t => !t.IsAlly).ToList();
+            AllyTurrets = ObjectHandler.Get<Obj_AI_Turret>().FindAll(t => t.IsAlly);
+            EnemyTurrets = ObjectHandler.Get<Obj_AI_Turret>().FindAll(t => !t.IsAlly);
+            ClosestAllyTurret = AllyTurrets.OrderBy(t => t.Distance(ObjectManager.Player.Position)).FirstOrDefault();
+            ClosestEnemyTurret = EnemyTurrets.OrderBy(t => t.Distance(ObjectManager.Player.Position)).FirstOrDefault();
         }
     }
 }
