@@ -50,11 +50,11 @@ namespace AiM.Utils
         internal static void Update()
         {
             Positioning.Update();
-
+            var curpos = ObjectManager.Player.ServerPosition;
             if (TeamfightPosition == null)
-                TeamfightPosition = new Vector2();
+                TeamfightPosition = new Vector2(curpos.X, curpos.Y);
             if (ExpRangePosition == null)
-                ExpRangePosition = new Vector2();
+                ExpRangePosition = new Vector2(curpos.X, curpos.Y);
 
             ExpRangePosition =
                 Positioning.ExpZone.OrderBy(p => p.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
@@ -63,21 +63,23 @@ namespace AiM.Utils
                 {
                 var pointClosestToEnemyHQ =
                             Positioning.AllyZone.OrderBy(v2 => v2.Distance(HeadQuarters.EnemyHQ.Position)).FirstOrDefault();
-
+                var positioningCandidates = new List<Vector2>();
                         //remove people that just respawned from the point list
                         foreach (var v2 in Positioning.AllyZone)
                         {
-                            if (v2.Distance(pointClosestToEnemyHQ) > 1500)
+                            if (!(v2.Distance(pointClosestToEnemyHQ) > 1500))
                             {
-                                Positioning.AllyZone.Remove(v2);
+                                positioningCandidates.Add(v2);
                             }
                         }
 
                         //return a random orbwalk pos candidate from the list
-                        TeamfightPosition = Positioning.AllyZone.FirstOrDefault();
+                        TeamfightPosition = positioningCandidates
+                            .OrderBy(p => new Random(Environment.TickCount).Next())
+                                .FirstOrDefault();
 
                         if (TeamfightPosition.IsValid()) {return;}
-                }
+                 }
             //for SR :s
             var minion = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
             var farthestTurret =

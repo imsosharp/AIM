@@ -54,11 +54,6 @@ namespace AiM.Utils
 
         public static void Update()
         {
-            if(AllyMinions == null)
-                AllyMinions = new List<Obj_AI_Minion>();
-            if(EnemyMinions == null)
-                EnemyMinions = new List<Obj_AI_Minion>();
-
             AllyMinions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly && !m.IsDead && !m.IsHeroPet()).ToList();
             EnemyMinions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet()).ToList();
         }
@@ -72,9 +67,9 @@ namespace AiM.Utils
         public static void Update()
         {
             if (AllyHeroes == null)
-                AllyHeroes = new List<Obj_AI_Hero>();
+                AllyHeroes = HeroManager.Allies;
             if (EnemyHeroes == null)
-                EnemyHeroes = new List<Obj_AI_Hero>();
+                EnemyHeroes = HeroManager.Enemies;
 
             AllyHeroes = ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly).ToList();
             EnemyHeroes = ObjectManager.Get<Obj_AI_Hero>().Where(h => !h.IsAlly).ToList();

@@ -116,16 +116,31 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction FarmAction = new BehaviorAction(
             () =>
             {
+                var pos = new Vector2();
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
-                var pos = new Vector2(ObjectManager.Player.ServerPosition.X + rInt, ObjectManager.Player.Position.Y + rInt).To3D();
+                if (ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountNearbyAllyMinions(800) < 2)
+                {
+                    var nearbyAllyTurret = Turrets.AllyTurrets.OrderBy(t => t.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                    pos.X = nearbyAllyTurret.Position.X + rInt;
+                    pos.Y = nearbyAllyTurret.Position.Y + rInt;
+                }
+                else
+                {
+                    pos.X = ObjectManager.Player.ServerPosition.X + rInt; 
+                    pos.Y = ObjectManager.Player.ServerPosition.Y + rInt;
+                }
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
-                AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
+                AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos.To3D());
                 return BehaviorState.Success;
             });
 
         internal static BehaviorAction MixedAction = new BehaviorAction(
             () =>
             {
+                if (EasyPositioning.TeamfightPosition == null)
+                {
+                    Console.WriteLine("TF Pos null!"); return BehaviorState.Failure;
+                }
                 var minion = Wizard.GetClosestEnemyMinion();
                 var rInt = new Random().Next(650, 1100) * Wizard.GetDefensiveMultiplier();
                 Vector3 pos;
@@ -158,7 +173,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldFarm = new Conditional(
             () =>
             {
-                if (ObjectManager.Player.UnderTurret() && ObjectManager.Player.Distance(Wizard.GetFarthestAllyTurret()) < 800 && ObjectManager.Player.CountEnemiesInRange(1000) > 1)
+                if (ObjectManager.Player.UnderTurret() && ObjectManager.Player.Distance(Wizard.GetFarthestAllyTurret().Position) < 800 && ObjectManager.Player.CountEnemiesInRange(1000) > 1)
                 {
                     return true;
                 }
@@ -180,25 +195,25 @@ namespace AiM.Behaviors.ARAM
             {
                 if (HeroManager.Enemies.Count == 0)
                 {return false;}
-                if (Positioning.AllyZone.Intersect(Positioning.EnemyZone).Count() >= Positioning.AllyZone.Count / 3)
+                /*if (Positioning.AllyZone.Intersect(Positioning.EnemyZone).Count() >= Positioning.AllyZone.Count / 3)
                 {
                     return true;
-                }
+                }*/
                 var teamfightingAllies = 0;
-                foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().FindAll(h => h.IsAlly))
+                foreach (var ally in Heroes.AllyHeroes)
                 {
                     var waypoints = ally.GetWaypoints().ToList();
-                    var path = new List<IntPoint>();
+                    var path = new List<Vector2>();
                     foreach (var waypoint in waypoints)
                     {
-                        path.Add(new IntPoint(waypoint.X, waypoint.Y));
+                        path.Add(new Vector2(waypoint.X, waypoint.Y));
                     }
-                    if (Positioning.EnemyZone.Contains(path))
+                    if (Positioning.EnemyZone.Contains(path[1]))
                     {
                         teamfightingAllies++;
                     }
                 }
-                if (teamfightingAllies >= 2)
+                if (teamfightingAllies >= 3)
                 {
                     return true;
                 }
