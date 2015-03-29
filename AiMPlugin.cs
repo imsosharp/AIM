@@ -47,7 +47,6 @@ namespace AiM
             //initialize events
             CustomEvents.Game.OnGameLoad += OnGameLoad;
             Game.OnUpdate += OnGameUpdate;
-            Drawing.OnDraw += OnDraw;
             Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
@@ -116,12 +115,6 @@ namespace AiM
             
         }
 
-
-        internal virtual void OnDraw(EventArgs args)
-        {
-            
-        }
-
         internal virtual void OnPossibleToInterrupt(Obj_AI_Hero hero, Interrupter2.InterruptableTargetEventArgs args)
         {
             
@@ -129,7 +122,12 @@ namespace AiM
 
         internal virtual void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            
+            if (sender is Obj_AI_Minion || sender is Obj_AI_Turret && args.Target.IsMe)
+            {
+                var closestAllyMinion = Minions.ClosestAllyMinions.OrderBy(m => new Random().Next()).FirstOrDefault();
+                if (closestAllyMinion == null || !closestAllyMinion.IsValid) { return; }
+                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, closestAllyMinion.Position);
+            }
         }
 
         //Used by Humanizer and checks for not attacking target under turret
@@ -141,6 +139,17 @@ namespace AiM
             }
             if (args.Order == GameObjectOrder.MoveTo)
             {
+                if (ObjectManager.Player.HasBuff("SionR"))
+                {
+                    args.Process = false;
+                    return;
+                }
+                if (args.TargetPosition.UnderTurret(true) && args.TargetPosition.CountNearbyAllyMinions(800) <= 2)
+                {
+                    args.Process = false;
+                    return;
+                }
+
                 if (Environment.TickCount - LastMove < Config.Item("MovementDelay").GetValue<Slider>().Value &&
                     Config.Item("MovementEnabled").GetValue<bool>())
                 {
