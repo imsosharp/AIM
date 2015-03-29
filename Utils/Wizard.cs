@@ -120,7 +120,7 @@ namespace AiM.Utils
 
         public static bool IsLowHealth(this Obj_AI_Base x)
         {
-            return x.HealthPercentage() >= 30.0f;
+            return x.HealthPercent < 30f;
         }
     }
 }
