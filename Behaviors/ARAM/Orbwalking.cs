@@ -184,27 +184,17 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldTeamfight = new Conditional(
             () =>
             {
-                if (HeroManager.Enemies.Count == 0)
-                {return false;}
-                /*if (Positioning.AllyZone.Intersect(Positioning.EnemyZone).Count() >= Positioning.AllyZone.Count / 3)
+                var player = ObjectManager.Player;
+                var playerPos = ObjectManager.Player.Position;
+                if (HeroManager.Enemies.Count == 0 || playerPos.CountNearbyAllies(1000) < playerPos.CountNearbyEnemies(1000))
                 {
-                    return true;
-                }*/
-                var teamfightingAllies = 0;
-                foreach (var ally in Heroes.AllyHeroes)
-                {
-                    var waypoints = ally.GetWaypoints().ToList();
-                    var path = new List<Vector2>();
-                    foreach (var waypoint in waypoints)
-                    {
-                        path.Add(new Vector2(waypoint.X, waypoint.Y));
-                    }
-                    if (Positioning.EnemyZone.Contains(path[1]))
-                    {
-                        teamfightingAllies++;
-                    }
+                    return false;
                 }
-                if (teamfightingAllies >= 3)
+                if (player.IsLowHealth())
+                {
+                    return false;
+                }
+                if (Positioning.AllyZone.Intersect(Positioning.EnemyZone).Count() >= Positioning.AllyZone.Count / 3)
                 {
                     return true;
                 }

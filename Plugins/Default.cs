@@ -70,25 +70,41 @@ namespace AiM.Plugins
 
         public override void OnGameUpdate(EventArgs args)
         {
-            if (GetTarget(600, Q.DamageType) == null)
+            foreach (var spell in MainSpells.Where(s => s.IsReady()))
             {
-                return;
-            }
-            if (Q.CastCheck().Tick() == BehaviorState.Success)
-            {
-                Q.Cast(GetTarget(Q.Range, Q.DamageType));
-            } 
-            if (W.CastCheck().Tick() == BehaviorState.Success)
-            {
-                W.Cast(GetTarget(W.Range, W.DamageType));
-            } 
-            if (E.CastCheck().Tick() == BehaviorState.Success)
-            {
-                E.Cast(GetTarget(W.Range, W.DamageType));
-            } 
-            if (R.CastCheck().Tick() == BehaviorState.Success)
-            {
-                R.Cast(GetTarget(W.Range, W.DamageType));
+                var s = spell.SData;
+
+                if (s.TargettingType.Equals(SpellDataTargetType.Self))
+                {
+                    Player.Spellbook.CastSpell(spell.Slot, Player);
+                }
+                else if (s.TargettingType.Equals(SpellDataTargetType.Unit) && s.Flags.HasFlag(SpellDataFlags.AffectHeroes))
+                {
+                    if (s.Flags.HasFlag(SpellDataFlags.AffectEnemies))
+                    {
+                        //switch to target selector once we can find magic/physical
+                        var target =
+                            ObjectHandler.Get<Obj_AI_Hero>()
+                                .Enemies.Where(h => h.IsValidTarget(s.CastRange))
+                                .OrderBy(h => h.Health).FirstOrDefault();
+                        if (target != null)
+                        {
+                            Player.Spellbook.CastSpell(spell.Slot, target);
+                        }
+                        else if (s.Flags.HasFlag(SpellDataFlags.AffectFriends))
+                        {
+                            var ally =
+                                ObjectHandler.Get<Obj_AI_Hero>()
+                                    .Allies.Where(h => h.IsValidTarget(s.CastRange, false))
+                                    .OrderBy(h => h.Health)
+                                    .FirstOrDefault();
+                            if (ally != null)
+                            {
+                                Player.Spellbook.CastSpell(spell.Slot, ally);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

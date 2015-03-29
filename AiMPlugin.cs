@@ -102,6 +102,10 @@ namespace AiM
         internal static Spell R;
 
         internal static Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>();
+        public static IEnumerable<SpellDataInst> MainSpells
+        {
+            get { return Player.Spellbook.Spells.Where(spell => spell.Slot <= SpellSlot.R); }
+        } 
         #endregion Spells
         #region Events
 
@@ -174,6 +178,5 @@ namespace AiM
             }
         }
         #endregion Events
-
     }
 }
