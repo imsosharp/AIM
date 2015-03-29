@@ -39,11 +39,16 @@ namespace AiM.Utils
 {
     public static class Creatures
     {
+        private static int LastUpdate = 0;
         public static void UpdateAll()
         {
-            Minions.Update();
-            Heroes.Update();
-            Pets.Update();
+            if (Environment.TickCount - LastUpdate >= 500)
+            {
+                Minions.Update();
+                Heroes.Update();
+                Pets.Update();
+                LastUpdate = Environment.TickCount;
+            }
         }
     }
 
@@ -54,8 +59,8 @@ namespace AiM.Utils
 
         public static void Update()
         {
-            AllyMinions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly && !m.IsDead && !m.IsHeroPet()).ToList();
-            EnemyMinions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet()).ToList();
+            AllyMinions = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsAlly && !m.IsDead && !m.IsHeroPet()).ToList();
+            EnemyMinions = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet()).ToList();
         }
     }
 
@@ -66,13 +71,8 @@ namespace AiM.Utils
 
         public static void Update()
         {
-            if (AllyHeroes == null)
-                AllyHeroes = HeroManager.Allies;
-            if (EnemyHeroes == null)
-                EnemyHeroes = HeroManager.Enemies;
-
-            AllyHeroes = ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly).ToList();
-            EnemyHeroes = ObjectManager.Get<Obj_AI_Hero>().Where(h => !h.IsAlly).ToList();
+            AllyHeroes = HeroManager.Allies;
+            EnemyHeroes = HeroManager.Enemies;
         }
     }
 
@@ -83,13 +83,8 @@ namespace AiM.Utils
 
         public static void Update()
         {
-            if (AllyPets == null)
-                AllyPets = new List<Obj_AI_Minion>();
-            if (EnemyPets == null)
-                EnemyPets = new List<Obj_AI_Minion>();
-
-            AllyPets = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly && m.IsHeroPet() && !m.IsDead).ToList();
-            EnemyPets = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget() && !m.IsDead && m.IsHeroPet()).ToList();
+            AllyPets = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsAlly && m.IsHeroPet() && !m.IsDead).ToList();
+            EnemyPets = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget() && !m.IsDead && m.IsHeroPet()).ToList();
         }
     }
 }

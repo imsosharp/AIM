@@ -42,13 +42,18 @@ namespace AiM.Utils
     /// </summary>
     public static class Structures
     {
+        private static int LastUpdate = 0;
         /// <summary>
         /// A function to update all structures, called prefferably onupdate
         /// </summary>
         public static void UpdateAll()
         {
-            HeadQuarters.Update();
-            Turrets.Update();
+            if (Environment.TickCount - LastUpdate >= 500)
+            {
+                HeadQuarters.Update();
+                Turrets.Update();
+                LastUpdate = Environment.TickCount;
+            }
         }
     }
 
@@ -72,13 +77,8 @@ namespace AiM.Utils
         /// </summary>
         public static void Update()
         {
-            if (AllyHQ == null)
-                AllyHQ = new Obj_HQ();
-            if (EnemyHQ == null)
-                EnemyHQ = new Obj_HQ();
-
-            AllyHQ = ObjectManager.Get<Obj_HQ>().FirstOrDefault(hq => hq.IsAlly);
-            EnemyHQ = ObjectManager.Get<Obj_HQ>().FirstOrDefault(hq => !hq.IsAlly);
+            AllyHQ = ObjectHandler.Get<Obj_HQ>().FirstOrDefault(hq => hq.IsAlly);
+            EnemyHQ = ObjectHandler.Get<Obj_HQ>().FirstOrDefault(hq => !hq.IsAlly);
         }
     }
 
@@ -102,13 +102,8 @@ namespace AiM.Utils
         /// </summary>
         public static void Update()
         {
-            if (AllyTurrets == null)
-                AllyTurrets = new List<Obj_AI_Turret>();
-            if (EnemyTurrets == null)
-                EnemyTurrets = new List<Obj_AI_Turret>();
-
-            AllyTurrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsAlly).ToList();
-            EnemyTurrets = ObjectManager.Get<Obj_AI_Turret>().Where(t => !t.IsAlly).ToList();
+            AllyTurrets = ObjectHandler.Get<Obj_AI_Turret>().Where(t => t.IsAlly).ToList();
+            EnemyTurrets = ObjectHandler.Get<Obj_AI_Turret>().Where(t => !t.IsAlly).ToList();
         }
     }
 }
