@@ -93,7 +93,21 @@ namespace AiM.Utils
         public static bool IsHeroPet(this Obj_AI_Base minion)
         {
             var mn = minion.BaseSkinName;
-            if (mn.Contains("teemo") || mn.Contains("shroom") || mn.Contains("turret") || mn.Contains("clone") || mn.Contains("blanc"))
+            if (mn.Contains("teemo") || mn.Contains("shroom") || mn.Contains("turret") || mn.Contains("clone") || mn.Contains("blanc") || mn.Contains("trap") || mn.Contains("mine"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsAvoidable(this GameObject obj)
+        {
+            if (obj.IsAlly)
+            {
+                return false;
+            }
+            var on = obj.Name;
+            if (on.Contains("teemo") || on.Contains("shroom") || on.Contains("turret") || on.Contains("clone") || on.Contains("blanc") || on.Contains("trap") || on.Contains("mine") || on.Contains("nida") || on.Contains("morg") || on.Contains("ziggs"))
             {
                 return true;
             }
@@ -142,6 +156,13 @@ namespace AiM.Utils
             var r = new Random(Environment.TickCount);
             var randBy = AiMPlugin.Config.Item("RandBy").GetValue<Slider>().Value;
             return new Vector2(v.X + r.Next(randBy, randBy), v.Y + r.Next(randBy, randBy)).To3D();
+        }
+
+        public static void MoveToClosestAllyMinion()
+        {
+            AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
+            AiMPlugin.Orbwalker.SetAttack(false);
+            AiMPlugin.Orbwalker.SetOrbwalkingPoint(GetFarthestMinion().RandomizePosition());
         }
     }
 }

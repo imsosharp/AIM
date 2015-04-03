@@ -55,6 +55,10 @@ namespace AiM.Utils
             {
                 Minions.Update();
             }
+            if (sender.IsAvoidable())
+            {
+                GameObjects.AvoidableObjects.Add(sender, sender.Position);
+            }
         }
         private static void OnDelete(GameObject sender, EventArgs args)
         {
@@ -62,15 +66,23 @@ namespace AiM.Utils
             {
                 Minions.Update();
             }
+            if (GameObjects.AvoidableObjects.Any(o => o.Key == sender))
+            {
+                GameObjects.AvoidableObjects.Remove(sender);
+            }
         }
         #endregion
+    }
+
+    public static class GameObjects
+    {
+        public static Dictionary<GameObject, Vector3> AvoidableObjects = new Dictionary<GameObject, Vector3>();
     }
 
     public static class Minions
     {
         public static List<Obj_AI_Minion> AllyMinions = new List<Obj_AI_Minion>();
         public static List<Obj_AI_Minion> EnemyMinions = new List<Obj_AI_Minion>();
-        public static List<Obj_AI_Minion> ClosestAllyMinions = new List<Obj_AI_Minion>();
 
         public static void Update()
         {
@@ -79,9 +91,6 @@ namespace AiM.Utils
 
             EnemyMinions.Clear();
             EnemyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet());
-
-            ClosestAllyMinions.Clear();
-            ClosestAllyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet() && m.Distance(Heroes.Me.Position) < 2000);
         }
     }
 

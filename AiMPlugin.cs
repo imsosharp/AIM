@@ -88,6 +88,10 @@ namespace AiM
             //Randomizer
             var rand = Config.AddSubMenu(new Menu("Randomizer", "Randomizer"));
             rand.AddItem(new MenuItem("RandBy", "Randomize By")).SetValue(new Slider(128, 32, 255));
+            //Avoider
+            var avoid = Config.AddSubMenu(new Menu("Avoid", "Avoid!"));
+            move.AddItem(new MenuItem("AvoidEnabled", "Enabled").SetValue(true));
+            avoid.AddItem(new MenuItem("AvoidRadius", "Avoid Radius")).SetValue(new Slider(128, 32, 400));
             //Orbwalker
             Config.AddSubMenu(new Menu("Orbwalking", "orbwalkingmenu"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("orbwalkingmenu"));
@@ -131,9 +135,9 @@ namespace AiM
         {
             if (sender is Obj_AI_Minion || sender is Obj_AI_Turret && args.Target.IsMe)
             {
-                var closestAllyMinion = Minions.ClosestAllyMinions.OrderBy(m => new Random().Next()).FirstOrDefault();
-                if (closestAllyMinion == null || !closestAllyMinion.IsValid) { return; }
-                ObjectHandler.Player.IssueOrder(GameObjectOrder.MoveTo, closestAllyMinion.Position);
+                var randomAllyMinion = Minions.AllyMinions.OrderBy(m => new Random().Next()).FirstOrDefault();
+                if (randomAllyMinion == null || !randomAllyMinion.IsValid) { return; }
+                ObjectHandler.Player.IssueOrder(GameObjectOrder.MoveTo, randomAllyMinion.Position.RandomizePosition());
             }
         }
 
@@ -151,10 +155,20 @@ namespace AiM
                     args.Process = false;
                     return;
                 }
-                if (args.TargetPosition.UnderTurret(true) && args.TargetPosition.CountNearbyAllyMinions(800) <= 2)
+                if (args.TargetPosition.UnderTurret(true) && args.TargetPosition.CountNearbyAllyMinions(800) <= 2 && !ObjectHandler.Player.UnderTurret(true))
                 {
                     args.Process = false;
                     return;
+                }
+                if (args.TargetPosition.UnderTurret(true) && args.TargetPosition.CountNearbyAllyMinions(800) <= 2 && ObjectHandler.Player.UnderTurret(true))
+                {
+                    args.Process = false;
+                    Wizard.MoveToClosestAllyMinion();
+                    return;
+                }
+                if (Config.Item("AvoidEnabled").GetValue<bool>() && GameObjects.AvoidableObjects.Any(o => args.TargetPosition.Distance(o.Value) < Config.Item("AvoidRadius").GetValue<Slider>().Value))
+                {
+                    args.Process = false;
                 }
 
                 if (Environment.TickCount - LastMove < Config.Item("MovementDelay").GetValue<Slider>().Value &&
