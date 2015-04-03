@@ -85,6 +85,9 @@ namespace AiM
             var move = Config.AddSubMenu(new Menu("Humanizer", "humanizer"));
             move.AddItem(new MenuItem("MovementEnabled", "Enabled").SetValue(true));
             move.AddItem(new MenuItem("MovementDelay", "Movement Delay")).SetValue(new Slider(400, 0, 1000));
+            //Randomizer
+            var rand = Config.AddSubMenu(new Menu("Randomizer", "Randomizer"));
+            rand.AddItem(new MenuItem("RandBy", "Randomize By")).SetValue(new Slider(128, 32, 255));
             //Orbwalker
             Config.AddSubMenu(new Menu("Orbwalking", "orbwalkingmenu"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("orbwalkingmenu"));
