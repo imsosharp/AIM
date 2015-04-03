@@ -87,13 +87,13 @@ namespace AiM
             move.AddItem(new MenuItem("MovementDelay", "Movement Delay")).SetValue(new Slider(400, 0, 1000));
             //Randomizer
             var rand = Config.AddSubMenu(new Menu("Randomizer", "Randomizer"));
-            move.AddItem(new MenuItem("PlayDefensive", "Randomize defensively?").SetValue(true));
+            rand.AddItem(new MenuItem("PlayDefensive", "Randomize defensively?").SetValue(true));
             rand.AddItem(new MenuItem("MinEnemiesToPlayDef", "Min enemies to play def")).SetValue(new Slider(1, 0, 5));
             rand.AddItem(new MenuItem("MinRandBy", "Minimum Randomizer")).SetValue(new Slider(128, 32, 255));
             rand.AddItem(new MenuItem("MaxRandBy", "Maximum Randomizer")).SetValue(new Slider(255, 255, 900));
             //Avoider
             var avoid = Config.AddSubMenu(new Menu("Avoid!", "Avoid"));
-            move.AddItem(new MenuItem("AvoidEnabled", "Enabled").SetValue(true));
+            avoid.AddItem(new MenuItem("AvoidEnabled", "Enabled").SetValue(true));
             avoid.AddItem(new MenuItem("AvoidRadius", "Avoid Radius")).SetValue(new Slider(128, 32, 400));
             //Orbwalker
             Config.AddSubMenu(new Menu("Orbwalking", "orbwalkingmenu"));
