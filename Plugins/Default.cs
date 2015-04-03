@@ -50,12 +50,12 @@ namespace AiM.Plugins
             var e = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.E).Name);
             var r = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.R).Name);
 
+            //Initializing spells
             Q = new Spell(SpellSlot.Q, q.CastRange);
             W = new Spell(SpellSlot.W, w.CastRange);
             E = new Spell(SpellSlot.E, e.CastRange);
             R = new Spell(SpellSlot.R, e.CastRange);
 
-            //Initializing spells
             List<Data.SpellData> MySkillShots = new List<Data.SpellData>();
             MySkillShots = Data.SpellDatabase.Spells.FindAll(s => s.ChampionName == ObjectHandler.Player.ChampionName);
             foreach(var ss in MySkillShots)
