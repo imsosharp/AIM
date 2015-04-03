@@ -34,6 +34,7 @@ using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
 using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
 using AiM.Utils;
+using Data = AiM.Utils.Data;
 #endregion AiM License
 
 
@@ -49,6 +50,35 @@ namespace AiM.Plugins
             E = new Spell(SpellSlot.E, 200);
             R = new Spell(SpellSlot.R, 600);
 
+            List<Data.SpellData> MySkillShots = new List<Data.SpellData>();
+            MySkillShots = Data.SpellDatabase.Spells.FindAll(s => s.ChampionName == ObjectHandler.Player.ChampionName);
+            foreach(var ss in MySkillShots)
+            {
+                if (ss.Slot == SpellSlot.Q)
+                {
+                    Q.Range = ss.Range;
+                    Q.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
+                    return;
+                } 
+                if (ss.Slot == SpellSlot.W)
+                {
+                    W.Range = ss.Range;
+                    W.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
+                    return;
+                }
+                if (ss.Slot == SpellSlot.E)
+                {
+                    E.Range = ss.Range;
+                    E.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
+                    return;
+                }
+                if (ss.Slot == SpellSlot.R)
+                {
+                    R.Range = ss.Range;
+                    R.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
+                }
+            }
+
             //Get SpellData for spells
             var q = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.Q).Name);
             var w = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.W).Name);
@@ -56,10 +86,31 @@ namespace AiM.Plugins
             var r = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.R).Name);
 
             //Set spells
-            Q.SetSkillshot(q.SpellCastTime, q.LineWidth, q.MissileSpeed, true, SkillshotType.SkillshotLine);
-            W.SetSkillshot(w.SpellCastTime, w.LineWidth, w.MissileSpeed, true, SkillshotType.SkillshotLine);
-            E.SetTargetted(e.SpellCastTime, e.SpellCastTime);
-            R.SetTargetted(r.SpellCastTime, r.SpellCastTime);
+            if (!Q.IsSkillshot)
+            {
+                Q.Range = q.CastRange;
+                Q.SetTargetted(q.DelayTotalTimePercent, q.SpellCastTime);
+            }
+            if (!W.IsSkillshot)
+            {
+                W.Range = w.CastRange;
+                W.SetTargetted(w.DelayTotalTimePercent, q.SpellCastTime);
+            }
+            if (!E.IsSkillshot)
+            {
+                E.Range = e.CastRange;
+                E.SetTargetted(e.DelayTotalTimePercent, e.SpellCastTime);
+            }
+            if(!R.IsSkillshot)
+            {
+                R.Range = r.CastRange;
+                R.SetTargetted(r.DelayTotalTimePercent, r.SpellCastTime);
+            }
+
+            Spells.Add(SpellSlot.Q, Q);
+            Spells.Add(SpellSlot.W, W);
+            Spells.Add(SpellSlot.E, E);
+            Spells.Add(SpellSlot.R, R);
 
             //Menu
             ComboConfig.AddBool("ComboQ", "Use Q", true);
@@ -70,42 +121,107 @@ namespace AiM.Plugins
 
         public override void OnGameUpdate(EventArgs args)
         {
-            foreach (var spell in MainSpells.Where(s => s.IsReady()))
+            if (PreventCodeFromExecuting)
+            { 
+                return;
+            }
+            try
             {
-                var s = spell.SData;
-
-                if (s.TargettingType.Equals(SpellDataTargetType.Self))
+                if (TestedSpells.Count() != AvailableSpells.Count()
+                    || AvailableSpells.Count() != Spells.Count())
                 {
-                    Player.Spellbook.CastSpell(spell.Slot, Player);
+                    IndexSpells();
                 }
-                else if (s.TargettingType.Equals(SpellDataTargetType.Unit) && s.Flags.HasFlag(SpellDataFlags.AffectHeroes))
+                //pure SBTW logic right here
+                foreach (var spell in Spells)
                 {
-                    if (s.Flags.HasFlag(SpellDataFlags.AffectEnemies))
+                    if (!spell.Key.IsReady())
                     {
-                        //switch to target selector once we can find magic/physical
-                        var target =
-                            ObjectHandler.Get<Obj_AI_Hero>()
-                                .Enemies.Where(h => h.IsValidTarget(s.CastRange))
-                                .OrderBy(h => h.Health).FirstOrDefault();
-                        if (target != null)
+                        return;
+                    }
+                    if (spell.Value.IsSkillshot)
+                    {
+                        //what is this? XD
+                        spell.Value.CastOnBestTarget();
+                        if (spell.Key.IsReady())
+                            spell.Value.Cast(GetTarget(spell.Value.Range, TargetSelector.DamageType.Magical));
+                        return;
+                    }
+                    if (CastableOnAllies.Contains(spell.Value))
+                    {
+                        spell.Value.CastOnUnit(Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault());
+                        return;
+                    }
+                    if (SelfCastable.Contains(spell.Value))
+                    {
+                        spell.Value.CastOnUnit(ObjectHandler.Player);
+                        return;
+                    }
+                    spell.Value.CastOnUnit(GetTarget(spell.Value.Range, TargetSelector.DamageType.Magical));
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+                PreventCodeFromExecuting = true;
+            }
+        }
+
+        #region Index Spells To See If They Should Be Casted On Allies Or Enemies
+        public static void IndexSpells()
+        {
+            
+            if (Heroes.AllyHeroes.Count() == 0)
+            {
+                return;
+            }
+            //Store all available spells in a list
+            if (AvailableSpells.Count() != Spells.Count())
+            {
+                foreach (var spell in Spells)
+                {
+                    if (AvailableSpells.Contains(spell.Value))
+                    { 
+                        return;
+                    }
+                    if (spell.Value.Level != 0)
+                    {
+                        AvailableSpells.Add(spell.Value);
+                        if (spell.Value.IsSkillshot)
                         {
-                            Player.Spellbook.CastSpell(spell.Slot, target);
-                        }
-                        else if (s.Flags.HasFlag(SpellDataFlags.AffectFriends))
-                        {
-                            var ally =
-                                ObjectHandler.Get<Obj_AI_Hero>()
-                                    .Allies.Where(h => h.IsValidTarget(s.CastRange, false))
-                                    .OrderBy(h => h.Health)
-                                    .FirstOrDefault();
-                            if (ally != null)
-                            {
-                                Player.Spellbook.CastSpell(spell.Slot, ally);
-                            }
+                            TestedSpells.Add(spell.Value);
                         }
                     }
                 }
             }
+            //Test if it can be cast on self/ally
+            foreach(var spell in AvailableSpells)
+            {
+                if (TestedSpells.Contains(spell))
+                {
+                    return;
+                }
+                if (spell.IsReady())
+                {
+                    spell.CastOnUnit(Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault());
+                }
+                if (!spell.IsReady())
+                {
+                    CastableOnAllies.Add(spell);
+                    TestedSpells.Add(spell);
+                }
+                if (spell.IsReady())
+                {
+                    spell.CastOnUnit(ObjectHandler.Player);
+                }
+                if (!spell.IsReady())
+                {
+                    SelfCastable.Add(spell);
+                }
+                TestedSpells.Add(spell);
+            }
+#endregion
+
         }
     }
 }

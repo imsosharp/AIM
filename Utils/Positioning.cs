@@ -172,9 +172,9 @@ namespace AiM.Utils
         {
             var heroSpells = new List<SpellData>
             {
-                SpellData.GetSpellData(hero.GetSpell(SpellSlot.Q).Name),
-                SpellData.GetSpellData(hero.GetSpell(SpellSlot.W).Name),
-                SpellData.GetSpellData(hero.GetSpell(SpellSlot.E).Name)
+                LeagueSharp.SpellData.GetSpellData(hero.GetSpell(SpellSlot.Q).Name),
+                LeagueSharp.SpellData.GetSpellData(hero.GetSpell(SpellSlot.W).Name),
+                LeagueSharp.SpellData.GetSpellData(hero.GetSpell(SpellSlot.E).Name)
             };
             var spellsOrderedByRange = heroSpells.OrderBy(s => s.CastRange);
             if (spellsOrderedByRange.FirstOrDefault() != null)
