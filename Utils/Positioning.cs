@@ -40,8 +40,8 @@ namespace AiM.Utils
     public static class EasyPositioning
     {
         private static int LastUpdate = 0;
-        public static Vector2 TeamfightPosition { get; private set; }
-        public static Vector2 ExpRangePosition { get; private set; }
+        public static Vector3 TeamfightPosition { get; private set; }
+        public static Vector3 ExpRangePosition { get; private set; }
 
 
         /// <summary>
@@ -53,14 +53,9 @@ namespace AiM.Utils
             {
                 LastUpdate = Environment.TickCount;
                 Positioning.Update();
-                var curpos = ObjectHandler.Player.Position;
-                if (TeamfightPosition == null)
-                    TeamfightPosition = new Vector2(curpos.X, curpos.Y);
-                if (ExpRangePosition == null)
-                    ExpRangePosition = new Vector2(curpos.X, curpos.Y);
 
                 ExpRangePosition =
-                    Positioning.ExpZone.OrderBy(p => p.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
+                    Positioning.ExpZone.OrderBy(p => p.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault().RandomizePosition();
 
                 if (Game.MapId == GameMapId.HowlingAbyss && HeroManager.Allies.Count(h => !h.IsMe) >= 1)
                 {
@@ -79,7 +74,8 @@ namespace AiM.Utils
                     //return a random orbwalk pos candidate from the list
                     TeamfightPosition = positioningCandidates
                         .OrderBy(p => new Random(Environment.TickCount).Next())
-                            .FirstOrDefault();
+                            .FirstOrDefault()
+                                .RandomizePosition();
 
                     if (TeamfightPosition.IsValid()) { return; }
                 }
@@ -88,7 +84,7 @@ namespace AiM.Utils
                 var farthestTurret =
                     Turrets.AllyTurrets.OrderByDescending(t => t.Distance(HeadQuarters.AllyHQ))
                         .FirstOrDefault();
-                TeamfightPosition = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.To2D() : farthestTurret.Position.To2D();
+                TeamfightPosition = (minion != null && minion.IsValid<Obj_AI_Minion>()) ? minion.Position.RandomizePosition() : farthestTurret.Position.RandomizePosition();
             }
         }
     }

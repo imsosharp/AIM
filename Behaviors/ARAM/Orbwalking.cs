@@ -46,11 +46,9 @@ namespace AiM.Behaviors.ARAM
             () =>
             {
                 var followminion = Wizard.GetFarthestMinion();
-                var randomDist = new Random(Environment.TickCount).Next(-250, +250);
                 if (followminion != null && followminion.IsValid && !followminion.IsDead && !followminion.IsHeroPet())
                 {
-                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(
-                        new Vector2(followminion.Position.X + randomDist, followminion.Position.Y + randomDist).To3D());
+                    AiMPlugin.Orbwalker.SetOrbwalkingPoint(followminion.RandomizePosition());
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                     return BehaviorState.Success;
                 }
@@ -90,7 +88,7 @@ namespace AiM.Behaviors.ARAM
             {
                 var turret = Wizard.GetFarthestAllyTurret();
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
-                var pos = new Vector2(turret.Position.X + rInt, turret.Position.Y + rInt).To3D();
+                var pos = turret.RandomizePosition();
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
                 if (ObjectHandler.Player.Distance(pos) < 500)
@@ -137,11 +135,11 @@ namespace AiM.Behaviors.ARAM
                 Vector3 pos;
                 if (minion == null)
                 {
-                    pos = EasyPositioning.TeamfightPosition.To3D();
+                    pos = EasyPositioning.TeamfightPosition;
                 }
                 else
                 {
-                    pos = EasyPositioning.TeamfightPosition.To3D();
+                    pos = EasyPositioning.TeamfightPosition;
                 }
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);

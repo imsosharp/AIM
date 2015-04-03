@@ -122,5 +122,23 @@ namespace AiM.Utils
         {
             return x.HealthPercent < 30f;
         }
+
+        public static Vector3 RandomizePosition(this GameObject o)
+        {
+            var r = new Random(Environment.TickCount);
+            return new Vector2(o.Position.X + r.Next(-255, 255), o.Position.Y + r.Next(-255, 255)).To3D();
+        }
+
+        public static Vector3 RandomizePosition(this Vector3 v)
+        {
+            var r = new Random(Environment.TickCount);
+            return new Vector2(v.X + r.Next(-255, 255), v.Y + r.Next(-255, 255)).To3D();
+        }
+
+        public static Vector3 RandomizePosition(this Vector2 v)
+        {
+            var r = new Random(Environment.TickCount);
+            return new Vector2(v.X + r.Next(-255, 255), v.Y + r.Next(-255, 255)).To3D();
+        }
     }
 }
