@@ -142,7 +142,7 @@ namespace AiM.Utils
             var r = new Random(Environment.TickCount);
             var minRandBy = AiMPlugin.Config.Item("MinRandBy").GetValue<Slider>().Value;
             var maxRandBy = AiMPlugin.Config.Item("MaxRandBy").GetValue<Slider>().Value;
-            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>() && Heroes.EnemyHeroes.Any(h => h.Distance(ObjectHandler.Player.Position) < 1400))
+            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>() && Heroes.EnemyHeroes.Any(h => h.Distance(ObjectHandler.Player.Position) < AiMPlugin.Config.Item("MinEnemiesToPlayDef").GetValue<Slider>().Value))
             {
                 minRandBy *= GetDefensiveMultiplier();
                 maxRandBy *= GetDefensiveMultiplier();
@@ -159,7 +159,7 @@ namespace AiM.Utils
             var r = new Random(Environment.TickCount);
             var minRandBy = AiMPlugin.Config.Item("MinRandBy").GetValue<Slider>().Value;
             var maxRandBy = AiMPlugin.Config.Item("MaxRandBy").GetValue<Slider>().Value;
-            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>())
+            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>() && Heroes.EnemyHeroes.Any(h => h.Distance(ObjectHandler.Player.Position) < AiMPlugin.Config.Item("MinEnemiesToPlayDef").GetValue<Slider>().Value))
             {
                 minRandBy *= GetDefensiveMultiplier();
                 maxRandBy *= GetDefensiveMultiplier();
@@ -176,7 +176,7 @@ namespace AiM.Utils
             var r = new Random(Environment.TickCount);
             var minRandBy = AiMPlugin.Config.Item("MinRandBy").GetValue<Slider>().Value;
             var maxRandBy = AiMPlugin.Config.Item("MaxRandBy").GetValue<Slider>().Value;
-            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>())
+            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>() && Heroes.EnemyHeroes.Any(h => h.Distance(ObjectHandler.Player.Position) < AiMPlugin.Config.Item("MinEnemiesToPlayDef").GetValue<Slider>().Value))
             {
                 minRandBy *= GetDefensiveMultiplier();
                 maxRandBy *= GetDefensiveMultiplier();
