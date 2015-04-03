@@ -44,7 +44,7 @@ namespace AiM.Behaviors
         internal static IndexSelector Root = new IndexSelector(
             () =>
             {
-                if (ObjectManager.Player.IsDead)
+                if (ObjectHandler.Player.IsDead)
                 {
                     return 0;
                 }

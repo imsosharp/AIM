@@ -40,38 +40,55 @@ namespace AiM.Utils
     public static class Creatures
     {
         private static int LastUpdate = 0;
-        public static void UpdateAll()
+
+        public static void Load()
         {
-            if (Environment.TickCount - LastUpdate >= 500)
+            Heroes.Load();
+            GameObject.OnCreate += OnCreate;
+            GameObject.OnDelete += OnDelete;
+        }
+
+        #region GameObject Events subscribed to determine when to update cached minions
+        private static void OnCreate(GameObject sender, EventArgs args)
+        {
+            if (sender is Obj_AI_Minion)
             {
                 Minions.Update();
-                Heroes.Update();
-                LastUpdate = Environment.TickCount;
             }
         }
+        private static void OnDelete(GameObject sender, EventArgs args)
+        {
+            if (sender is Obj_AI_Minion)
+            {
+                Minions.Update();
+            }
+        }
+        #endregion
     }
 
     public static class Minions
     {
-        public static List<Obj_AI_Base> AllyMinions { get; private set; }
-        public static List<Obj_AI_Base> EnemyMinions { get; private set; }
-        public static List<Obj_AI_Base> ClosestAllyMinions { get; private set; }
+        public static List<Obj_AI_Minion> AllyMinions = new List<Obj_AI_Minion>();
+        public static List<Obj_AI_Minion> EnemyMinions = new List<Obj_AI_Minion>();
+        public static List<Obj_AI_Minion> ClosestAllyMinions = new List<Obj_AI_Minion>();
 
         public static void Update()
         {
-            AllyMinions = MinionManager.GetMinions(int.MaxValue).FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet());
-            EnemyMinions = MinionManager.GetMinions(int.MaxValue).FindAll(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet());
-            ClosestAllyMinions = MinionManager.GetMinions(2000).FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet());
+            AllyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet());
+            EnemyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet());
+            ClosestAllyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet() && m.Distance(Heroes.Me.Position) < 2000);
         }
     }
 
     public static class Heroes
     {
-        public static List<Obj_AI_Hero> AllyHeroes { get; private set; }
-        public static List<Obj_AI_Hero> EnemyHeroes { get; private set; }
+        public static Obj_AI_Hero Me { get; set; }
+        public static List<Obj_AI_Hero> AllyHeroes = new List<Obj_AI_Hero>();
+        public static List<Obj_AI_Hero> EnemyHeroes = new List<Obj_AI_Hero>();
 
-        public static void Update()
+        public static void Load()
         {
+            Me = ObjectHandler.Player;
             AllyHeroes = HeroManager.Allies;
             EnemyHeroes = HeroManager.Enemies;
         }

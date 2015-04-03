@@ -53,7 +53,7 @@ namespace AiM.Utils
             {
                 LastUpdate = Environment.TickCount;
                 Positioning.Update();
-                var curpos = ObjectManager.Player.ServerPosition;
+                var curpos = ObjectHandler.Player.ServerPosition;
                 if (TeamfightPosition == null)
                     TeamfightPosition = new Vector2(curpos.X, curpos.Y);
                 if (ExpRangePosition == null)
@@ -84,7 +84,7 @@ namespace AiM.Utils
                     if (TeamfightPosition.IsValid()) { return; }
                 }
                 //for SR :s
-                var minion = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
+                var minion = ObjectHandler.Get<Obj_AI_Minion>().Where(m => m.IsAlly).OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
                 var farthestTurret =
                     Turrets.AllyTurrets.OrderByDescending(t => t.Distance(HeadQuarters.AllyHQ))
                         .FirstOrDefault();
@@ -98,17 +98,17 @@ namespace AiM.Utils
         /// <summary>
         /// Returns a list of points in the Ally Zone
         /// </summary>
-        public static List<Vector2> AllyZone { get; private set; }
+        public static List<Vector2> AllyZone = new List<Vector2>();
 
         /// <summary>
         /// Returns a list of points in the Enemy Zone
         /// </summary>
-        public static List<Vector2> EnemyZone { get; private set; }
+        public static List<Vector2> EnemyZone = new List<Vector2>();
 
         /// <summary>
         /// Returns a pathlist of the zone in which you will get exp, not sure if it will ever be used.
         /// </summary>
-        public static List<Vector2> ExpZone { get; private set; }
+        public static List<Vector2> ExpZone = new List<Vector2>();
 
         /// <summary>
         /// Updates positioning props
@@ -116,10 +116,7 @@ namespace AiM.Utils
         internal static void Update()
         {
             #region Ally Zone
-            //initialize property if it isn't arleady initialized
-            if (AllyZone == null)
-                AllyZone = new List<Vector2>();
-
+            AllyZone.Clear();
             //advanced algorithms
             var allyZonePaths = Geometry.ClipPolygons(HeroManager.Allies.Where(h => !h.IsDead && !h.IsMe && !h.InFountain()).Select(hero => GetChampionRangeCircle(hero).ToPolygon()).ToList());
 
@@ -136,10 +133,7 @@ namespace AiM.Utils
             #endregion Ally Zone
 
             #region Enemy Zone
-            //initialize the property if it isn't arleady initialized
-            if (EnemyZone == null) 
-                EnemyZone = new List<Vector2>();
-
+            EnemyZone.Clear();
             //advanced algorithms
             var enemyZonePaths = Geometry.ClipPolygons(HeroManager.Enemies.FindAll(h => !h.IsDead && h.IsVisible).Select(hero => GetChampionRangeCircle(hero).ToPolygon()).ToList());
 
@@ -156,10 +150,7 @@ namespace AiM.Utils
             #endregion Enemy Zone
 
             #region ExpZone
-            //initialize the property if it isn't arleady initialized
-            if (ExpZone == null) 
-                ExpZone = new List<Vector2>();
-
+            ExpZone.Clear();
             //update only if enemy minion exists, if not, keep old values.
             if (Wizard.GetClosestEnemyMinion() != null && Wizard.GetClosestEnemyMinion().IsVisible && !Wizard.GetClosestEnemyMinion().IsDead && Wizard.GetClosestEnemyMinion().IsValid<Obj_AI_Minion>())
             {

@@ -45,30 +45,22 @@ namespace AiM
             Console.Clear();
             CustomEvents.Game.OnGameLoad += load =>
             {
-                Structures.UpdateAll();
-                Creatures.UpdateAll();
+                //Start caching objects
+                Creatures.Load();
+                Structures.Load();
+
+                //Check for updates
                 Helpers.Updater();
-                var plugin = Type.GetType("AiM.Plugins." + ObjectManager.Player.ChampionName);
-                try
-                {
-                    if (plugin == null)
-                    {
-                        plugin = Type.GetType("AiM.Plugins.Default");
-                    }
-                    Activator.CreateInstance(plugin);
-                    //autolevel
-                    new AutoLevel(LevelSequences.GetSequence().Select(num => num - 1).ToArray());
-                    AutoLevel.Enable();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+
+                //Initialize AutoLeveler
+                new AutoLevel(LevelSequences.GetSequence().Select(num => num - 1).ToArray());
+                AutoLevel.Enable();
+
+                //Load Champion Plugin
+                new PluginLoader();
             };
             Game.OnUpdate += tick =>
             {
-                Structures.UpdateAll();
-                Creatures.UpdateAll();
                 EasyPositioning.Update();
                 Behaviors.Tree.Root.Tick();
             };

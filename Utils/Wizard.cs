@@ -52,15 +52,15 @@ namespace AiM.Utils
 
         public static Obj_AI_Minion GetFarthestMinion()
         {
-            return (Obj_AI_Minion)Minions.AllyMinions.OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
+            return Minions.AllyMinions.OrderByDescending(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
         }
 
         public static Obj_AI_Minion GetFarthestMinionOnLane(Vector3 lanepos)
         {
-            return (Obj_AI_Minion)Minions.AllyMinions.OrderByDescending(m => m.Distance(lanepos)).FirstOrDefault();
+            return Minions.AllyMinions.OrderByDescending(m => m.Distance(lanepos)).FirstOrDefault();
         }
 
-        public static Obj_AI_Base GetClosestEnemyMinion()
+        public static Obj_AI_Minion GetClosestEnemyMinion()
         {
             return Minions.EnemyMinions.OrderBy(m => m.Distance(HeadQuarters.AllyHQ.Position)).FirstOrDefault();
         }
@@ -102,7 +102,7 @@ namespace AiM.Utils
 
         public static int GetAggressiveMultiplier()
         {
-            if (ObjectManager.Player.Team == GameObjectTeam.Order)
+            if (ObjectHandler.Player.Team == GameObjectTeam.Order)
             {
                 return 1;
             }
@@ -111,7 +111,7 @@ namespace AiM.Utils
 
         public static int GetDefensiveMultiplier()
         {
-            if (ObjectManager.Player.Team == GameObjectTeam.Order)
+            if (ObjectHandler.Player.Team == GameObjectTeam.Order)
             {
                 return -1;
             }

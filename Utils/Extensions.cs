@@ -112,7 +112,7 @@ namespace AiM.Utils
 
         public static bool IsValidAlly(this Obj_AI_Base unit, float range = float.MaxValue)
         {
-            return unit.Distance(ObjectManager.Player) < range && unit.IsValid<Obj_AI_Hero>() && unit.IsAlly &&
+            return unit.Distance(ObjectHandler.Player.Position) < range && unit.IsValid<Obj_AI_Hero>() && unit.IsAlly &&
                    !unit.IsDead && unit.IsTargetable;
         }
 
@@ -128,18 +128,18 @@ namespace AiM.Utils
 
         public static bool CastWithHitChance(this Spell spell, Obj_AI_Base target, string menu)
         {
-            var hc = AiMPlugin.Config.Item(menu + ObjectManager.Player.ChampionName).GetHitChance();
+            var hc = AiMPlugin.Config.Item(menu + ObjectHandler.Player.ChampionName).GetHitChance();
             return spell.CastIfHitchanceEquals(target, hc);
         }
 
         public static bool IsInRange(this Spell spell, Obj_AI_Base target)
         {
-            return ObjectManager.Player.Distance(target) < spell.Range;
+            return ObjectHandler.Player.Distance(target.Position) < spell.Range;
         }
 
         public static bool IsInRange(this Items.Item item, Obj_AI_Base target)
         {
-            return ObjectManager.Player.Distance(target) < item.Range;
+            return ObjectHandler.Player.Distance(target.Position) < item.Range;
         }
 
         public static bool WillKill(this Obj_AI_Base caster, Obj_AI_Base target, string spell, int buffer = 10)
@@ -155,31 +155,31 @@ namespace AiM.Utils
         public static void AddList(this Menu menu, string name, string displayName, string[] list)
         {
             menu.AddItem(
-                new MenuItem(name + ObjectManager.Player.ChampionName, displayName).SetValue(new StringList(list)));
+                new MenuItem(name + ObjectHandler.Player.ChampionName, displayName).SetValue(new StringList(list)));
         }
 
         public static void AddBool(this Menu menu, string name, string displayName, bool value)
         {
-            menu.AddItem(new MenuItem(name + ObjectManager.Player.ChampionName, displayName).SetValue(value));
+            menu.AddItem(new MenuItem(name + ObjectHandler.Player.ChampionName, displayName).SetValue(value));
         }
 
         public static void AddHitChance(this Menu menu, string name, string displayName, HitChance defaultHitChance)
         {
             menu.AddItem(
-                new MenuItem(name + ObjectManager.Player.ChampionName, displayName).SetValue(
+                new MenuItem(name + ObjectHandler.Player.ChampionName, displayName).SetValue(
                     new StringList((new[] { "Low", "Medium", "High", "Very High" }), (int)defaultHitChance - 3)));
         }
 
         public static void AddSlider(this Menu menu, string name, string displayName, int value, int min, int max)
         {
             menu.AddItem(
-                new MenuItem(name + ObjectManager.Player.ChampionName, displayName).SetValue(
+                new MenuItem(name + ObjectHandler.Player.ChampionName, displayName).SetValue(
                     new Slider(value, min, max)));
         }
 
         public static void AddObject(this Menu menu, string name, string displayName, object value)
         {
-            menu.AddItem(new MenuItem(name + ObjectManager.Player.ChampionName, displayName).SetValue(value));
+            menu.AddItem(new MenuItem(name + ObjectHandler.Player.ChampionName, displayName).SetValue(value));
         }
 
         public static HitChance GetHitChance(this MenuItem item)

@@ -42,23 +42,43 @@ namespace AiM.Utils
     /// </summary>
     public static class Structures
     {
-        private static int LastUpdate = 0;
-        /// <summary>
-        /// A function to update all structures, called prefferably onupdate
-        /// </summary>
-        public static void UpdateAll()
+        public static void Load()
         {
-            if (Environment.TickCount - LastUpdate >= 500)
+            HeadQuarters.Load();
+            Turrets.Update();
+            Inhibitors.Update();
+            GameObject.OnCreate += OnCreate;
+            GameObject.OnDelete += OnDelete;
+        }
+
+        #region GameObject Events subscribed to determine when to update cached structures
+        private static void OnCreate(GameObject sender, EventArgs args)
+        {
+            if (sender is Obj_AI_Turret)
             {
-                HeadQuarters.Update();
                 Turrets.Update();
-                LastUpdate = Environment.TickCount;
+            }
+            if (sender is Obj_Barracks)
+            {
+                Inhibitors.Update();
             }
         }
+        private static void OnDelete(GameObject sender, EventArgs args)
+        {
+            if (sender is Obj_AI_Turret)
+            {
+                Turrets.Update();
+            }
+            if (sender is Obj_Barracks)
+            {
+                Inhibitors.Update();
+            }
+        }
+        #endregion
     }
 
     /// <summary>
-    /// A class containing ally and enemy HQ
+    /// A class containing ally and enemy nexus.
     /// </summary>
     public static class HeadQuarters
     {
@@ -75,7 +95,7 @@ namespace AiM.Utils
         /// <summary>
         /// A function used to update HQs
         /// </summary>
-        public static void Update()
+        public static void Load()
         {
             AllyHQ = ObjectHandler.Get<Obj_HQ>().FirstOrDefault(hq => hq.IsAlly);
             EnemyHQ = ObjectHandler.Get<Obj_HQ>().FirstOrDefault(hq => !hq.IsAlly);
@@ -90,12 +110,12 @@ namespace AiM.Utils
         /// <summary>
         /// Returns Ally Turrets
         /// </summary>
-        public static List<Obj_AI_Turret> AllyTurrets { get; private set; }
+        public static List<Obj_AI_Turret> AllyTurrets = new List<Obj_AI_Turret>();
 
         /// <summary>
         /// Returns Enemy Turrets
         /// </summary>
-        public static List<Obj_AI_Turret> EnemyTurrets { get; private set; }
+        public static List<Obj_AI_Turret> EnemyTurrets = new List<Obj_AI_Turret>();
 
         /// <summary>
         /// Closest Ally Turret
@@ -112,10 +132,39 @@ namespace AiM.Utils
         /// </summary>
         public static void Update()
         {
+            AllyTurrets.Clear();
             AllyTurrets = ObjectHandler.Get<Obj_AI_Turret>().FindAll(t => t.IsAlly);
+            EnemyTurrets.Clear();
             EnemyTurrets = ObjectHandler.Get<Obj_AI_Turret>().FindAll(t => !t.IsAlly);
-            ClosestAllyTurret = AllyTurrets.OrderBy(t => t.Distance(ObjectManager.Player.Position)).FirstOrDefault();
-            ClosestEnemyTurret = EnemyTurrets.OrderBy(t => t.Distance(ObjectManager.Player.Position)).FirstOrDefault();
+            ClosestAllyTurret = AllyTurrets.OrderBy(t => t.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
+            ClosestEnemyTurret = EnemyTurrets.OrderBy(t => t.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
+        }
+    }
+
+    /// <summary>
+    /// A class containing ally and enemy inhibitors
+    /// </summary>
+    public static class Inhibitors
+    {
+        /// <summary>
+        /// Ally Inhibitors
+        /// </summary>
+        public static List<Obj_Barracks> AllyInhibitors = new List<Obj_Barracks>();
+
+        /// <summary>
+        /// Enemy Inhibitors
+        /// </summary>
+        public static List<Obj_Barracks> EnemyInhibitors = new List<Obj_Barracks>();
+
+        /// <summary>
+        /// A function used to update the cached Ally and Enemy Inhibitors.
+        /// </summary>
+        public static void Update()
+        {
+            AllyInhibitors.Clear();
+            AllyInhibitors = ObjectHandler.Get<Obj_Barracks>().FindAll(b => b.IsAlly);
+            EnemyInhibitors.Clear();
+            EnemyInhibitors = ObjectHandler.Get<Obj_Barracks>().FindAll(b => !b.IsAlly);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace AiM
             Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
         }
 
-        public static Obj_AI_Hero Player = ObjectManager.Player;
+        public static Obj_AI_Hero Player = ObjectHandler.Player;
         public static string ChampionName = Player.BaseSkinName;
         public static int LastMove { get; protected set; }
 
@@ -130,7 +130,7 @@ namespace AiM
             {
                 var closestAllyMinion = Minions.ClosestAllyMinions.OrderBy(m => new Random().Next()).FirstOrDefault();
                 if (closestAllyMinion == null || !closestAllyMinion.IsValid) { return; }
-                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, closestAllyMinion.Position);
+                ObjectHandler.Player.IssueOrder(GameObjectOrder.MoveTo, closestAllyMinion.Position);
             }
         }
 
@@ -143,7 +143,7 @@ namespace AiM
             }
             if (args.Order == GameObjectOrder.MoveTo)
             {
-                if (ObjectManager.Player.HasBuff("SionR"))
+                if (ObjectHandler.Player.HasBuff("SionR"))
                 {
                     args.Process = false;
                     return;

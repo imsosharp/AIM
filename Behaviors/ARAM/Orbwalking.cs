@@ -60,7 +60,7 @@ namespace AiM.Behaviors.ARAM
         internal static BehaviorAction TeamfightAction = new BehaviorAction(
             () =>
             {
-                if (ObjectManager.Player.IsMelee())
+                if (ObjectHandler.Player.IsMelee())
                 {
                     var target = AiMPlugin.GetMeleeTarget();
                     AiMPlugin.Orbwalker.ForceTarget(target);
@@ -74,10 +74,10 @@ namespace AiM.Behaviors.ARAM
                 }
                 else
                 {
-                    var def = (ObjectManager.Player.AttackRange - (new Random(Environment.TickCount).Next(50, 100)) * Wizard.GetDefensiveMultiplier());
+                    var def = (ObjectHandler.Player.AttackRange - (new Random(Environment.TickCount).Next(50, 100)) * Wizard.GetDefensiveMultiplier());
                     var orbPos = new Vector2(EasyPositioning.TeamfightPosition.X + def, EasyPositioning.TeamfightPosition.Y + def).To3D();
                     var target = AiMPlugin.GetTarget(
-                        ObjectManager.Player.AttackRange, TargetSelector.DamageType.Physical);
+                        ObjectHandler.Player.AttackRange, TargetSelector.DamageType.Physical);
                     AiMPlugin.Orbwalker.ForceTarget(target);
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Combo;
                     AiMPlugin.Orbwalker.SetOrbwalkingPoint(orbPos);
@@ -93,11 +93,11 @@ namespace AiM.Behaviors.ARAM
                 var pos = new Vector2(turret.Position.X + rInt, turret.Position.Y + rInt).To3D();
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos);
-                if (ObjectManager.Player.Distance(pos) < 500)
+                if (ObjectHandler.Player.Distance(pos) < 500)
                 {
                     return BehaviorState.Success;
                 }
-                else if(ObjectManager.Player.GetWaypoints().Any())
+                else if(ObjectHandler.Player.GetWaypoints().Any())
                 {
                     return BehaviorState.Running;
                 }
@@ -109,16 +109,16 @@ namespace AiM.Behaviors.ARAM
             {
                 var pos = new Vector2();
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
-                if (ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountNearbyAllyMinions(800) < 2)
+                if (ObjectHandler.Player.UnderTurret(true) && ObjectHandler.Player.CountNearbyAllyMinions(800) < 2)
                 {
-                    var nearbyAllyTurret = Turrets.AllyTurrets.OrderBy(t => t.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                    var nearbyAllyTurret = Turrets.AllyTurrets.OrderBy(t => t.Distance(ObjectHandler.Player.ServerPosition)).FirstOrDefault();
                     pos.X = nearbyAllyTurret.Position.X + rInt;
                     pos.Y = nearbyAllyTurret.Position.Y + rInt;
                 }
                 else
                 {
-                    pos.X = ObjectManager.Player.ServerPosition.X + rInt; 
-                    pos.Y = ObjectManager.Player.ServerPosition.Y + rInt;
+                    pos.X = ObjectHandler.Player.ServerPosition.X + rInt; 
+                    pos.Y = ObjectHandler.Player.ServerPosition.Y + rInt;
                 }
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos.To3D());
@@ -154,7 +154,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldPushLane = new Conditional(
             () =>
             {
-                if (ObjectManager.Player.ServerPosition.CountNearbyEnemies(4000) == 0 && Wizard.GetFarthestMinion() != null)
+                if (ObjectHandler.Player.ServerPosition.CountNearbyEnemies(4000) == 0 && Wizard.GetFarthestMinion() != null)
                 {
                     return true;
                 }
@@ -164,7 +164,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldFarm = new Conditional(
             () =>
             {
-                if (ObjectManager.Player.UnderTurret() && ObjectManager.Player.Distance(Wizard.GetFarthestAllyTurret().Position) < 800 && ObjectManager.Player.CountEnemiesInRange(1000) > 1)
+                if (ObjectHandler.Player.UnderTurret() && ObjectHandler.Player.Distance(Wizard.GetFarthestAllyTurret().Position) < 800 && ObjectHandler.Player.CountEnemiesInRange(1000) > 1)
                 {
                     return true;
                 }
@@ -174,7 +174,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldGoToLane = new Conditional(
             () =>
             {
-                if (ObjectManager.Player.Level == 3 && Wizard.GetFarthestMinion() == null)
+                if (ObjectHandler.Player.Level == 3 && Wizard.GetFarthestMinion() == null)
                 {
                     return true;
                 }
@@ -184,8 +184,8 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldTeamfight = new Conditional(
             () =>
             {
-                var player = ObjectManager.Player;
-                var playerPos = ObjectManager.Player.Position;
+                var player = ObjectHandler.Player;
+                var playerPos = ObjectHandler.Player.Position;
                 if (HeroManager.Enemies.Count == 0 || playerPos.CountNearbyAllies(1000) < playerPos.CountNearbyEnemies(1000))
                 {
                     return false;

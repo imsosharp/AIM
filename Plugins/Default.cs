@@ -50,10 +50,10 @@ namespace AiM.Plugins
             R = new Spell(SpellSlot.R, 600);
 
             //Get SpellData for spells
-            var q = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.Q).Name);
-            var w = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.W).Name);
-            var e = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.E).Name);
-            var r = SpellData.GetSpellData(ObjectManager.Player.GetSpell(SpellSlot.R).Name);
+            var q = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.Q).Name);
+            var w = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.W).Name);
+            var e = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.E).Name);
+            var r = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.R).Name);
 
             //Set spells
             Q.SetSkillshot(q.SpellCastTime, q.LineWidth, q.MissileSpeed, true, SkillshotType.SkillshotLine);
