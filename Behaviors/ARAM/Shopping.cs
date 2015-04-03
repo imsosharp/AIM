@@ -37,6 +37,5 @@ namespace AiM.Behaviors.ARAM
         //#TODO Implement Shopping Logic
         internal static BehaviorAction ShoppingAction = new BehaviorAction(() => Orbwalking.GoToLane.Tick());
         internal static Sequence ShoppingSequence = new Sequence(ShoppingConditional, ShopppingInverter, ShoppingAction);
-
     }
 }

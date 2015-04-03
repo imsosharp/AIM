@@ -140,29 +140,63 @@ namespace AiM.Utils
         public static Vector3 RandomizePosition(this GameObject o)
         {
             var r = new Random(Environment.TickCount);
-            var randBy = AiMPlugin.Config.Item("RandBy").GetValue<Slider>().Value;
-            return new Vector2(o.Position.X + r.Next(randBy, randBy), o.Position.Y + r.Next(randBy, randBy)).To3D();
+            var minRandBy = AiMPlugin.Config.Item("MinRandBy").GetValue<Slider>().Value;
+            var maxRandBy = AiMPlugin.Config.Item("MaxRandBy").GetValue<Slider>().Value;
+            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>() && Heroes.EnemyHeroes.Any(h => h.Distance(ObjectHandler.Player.Position) < 1400))
+            {
+                minRandBy *= GetDefensiveMultiplier();
+                maxRandBy *= GetDefensiveMultiplier();
+            }
+            else
+            {
+                minRandBy *= r.Next(-1, 1);
+            }
+            return new Vector2(o.Position.X + r.Next(minRandBy, maxRandBy), o.Position.Y + r.Next(minRandBy, maxRandBy)).To3D();
         }
 
         public static Vector3 RandomizePosition(this Vector3 v)
         {
             var r = new Random(Environment.TickCount);
-            var randBy = AiMPlugin.Config.Item("RandBy").GetValue<Slider>().Value;
-            return new Vector2(v.X + r.Next(randBy, randBy), v.Y + r.Next(randBy, randBy)).To3D();
+            var minRandBy = AiMPlugin.Config.Item("MinRandBy").GetValue<Slider>().Value;
+            var maxRandBy = AiMPlugin.Config.Item("MaxRandBy").GetValue<Slider>().Value;
+            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>())
+            {
+                minRandBy *= GetDefensiveMultiplier();
+                maxRandBy *= GetDefensiveMultiplier();
+            }
+            else
+            {
+                minRandBy *= r.Next(-1, 1);
+            }
+            return new Vector2(v.X + r.Next(minRandBy, maxRandBy), v.Y + r.Next(minRandBy, maxRandBy)).To3D();
         }
 
         public static Vector3 RandomizePosition(this Vector2 v)
         {
             var r = new Random(Environment.TickCount);
-            var randBy = AiMPlugin.Config.Item("RandBy").GetValue<Slider>().Value;
-            return new Vector2(v.X + r.Next(randBy, randBy), v.Y + r.Next(randBy, randBy)).To3D();
+            var minRandBy = AiMPlugin.Config.Item("MinRandBy").GetValue<Slider>().Value;
+            var maxRandBy = AiMPlugin.Config.Item("MaxRandBy").GetValue<Slider>().Value;
+            if (AiMPlugin.Config.Item("PlayDefensive").GetValue<bool>())
+            {
+                minRandBy *= GetDefensiveMultiplier();
+                maxRandBy *= GetDefensiveMultiplier();
+            }
+            else
+            {
+                minRandBy *= r.Next(-1, 1);
+            }
+            return new Vector2(v.X + r.Next(minRandBy, maxRandBy), v.Y + r.Next(minRandBy, maxRandBy)).To3D();
         }
 
         public static void MoveToClosestAllyMinion()
         {
-            AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Mixed;
-            AiMPlugin.Orbwalker.SetAttack(false);
-            AiMPlugin.Orbwalker.SetOrbwalkingPoint(GetFarthestMinion().RandomizePosition());
+            ObjectHandler.Player.IssueOrder(GameObjectOrder.MoveTo, GetFarthestMinion().RandomizePosition());
+        }
+        public static void MoveToRandomAllyMinion()
+        {
+            var randomAllyMinion = Minions.AllyMinions.OrderBy(m => new Random().Next()).FirstOrDefault();
+            if (randomAllyMinion == null || !randomAllyMinion.IsValid) { return; }
+            ObjectHandler.Player.IssueOrder(GameObjectOrder.MoveTo, randomAllyMinion.Position.RandomizePosition());
         }
     }
 }

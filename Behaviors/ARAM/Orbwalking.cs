@@ -107,7 +107,7 @@ namespace AiM.Behaviors.ARAM
             {
                 var pos = new Vector2();
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
-                if (ObjectHandler.Player.UnderTurret(true) && ObjectHandler.Player.CountNearbyAllyMinions(800) < 2)
+                if (ObjectHandler.Player.UnderTurret(true) && ObjectHandler.Player.Position.GetClosestEnemyTurret().CountNearbyAllyMinions(850) < 3)
                 {
                     var nearbyAllyTurret = Turrets.AllyTurrets.OrderBy(t => t.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
                     pos.X = nearbyAllyTurret.Position.X + rInt;
