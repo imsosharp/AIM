@@ -44,6 +44,17 @@ namespace AiM.Plugins
     {
         public Default()
         {
+            //Get SpellData for spells
+            var q = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.Q).Name);
+            var w = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.W).Name);
+            var e = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.E).Name);
+            var r = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.R).Name);
+
+            Q = new Spell(SpellSlot.Q, q.CastRange);
+            W = new Spell(SpellSlot.W, w.CastRange);
+            E = new Spell(SpellSlot.E, e.CastRange);
+            R = new Spell(SpellSlot.R, e.CastRange);
+
             //Initializing spells
             List<Data.SpellData> MySkillShots = new List<Data.SpellData>();
             MySkillShots = Data.SpellDatabase.Spells.FindAll(s => s.ChampionName == ObjectHandler.Player.ChampionName);
@@ -51,57 +62,44 @@ namespace AiM.Plugins
             {
                 if (ss.Slot == SpellSlot.Q)
                 {
-                    Q = new Spell(SpellSlot.Q, ss.Range);
                     Q.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                     return;
                 } 
                 if (ss.Slot == SpellSlot.W)
                 {
-                    W = new Spell(SpellSlot.Q, ss.Range);
                     W.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                     return;
                 }
                 if (ss.Slot == SpellSlot.E)
                 {
-                    E = new Spell(SpellSlot.Q, ss.Range);
                     E.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                     return;
                 }
                 if (ss.Slot == SpellSlot.R)
                 {
-                    R = new Spell(SpellSlot.Q, ss.Range);
                     R.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                 }
             }
 
-            //Get SpellData for spells
-            var q = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.Q).Name);
-            var w = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.W).Name);
-            var e = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.E).Name);
-            var r = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.R).Name);
-
             //Set spells
             if (Q == null || !Q.IsSkillshot)
             {
-                Q = new Spell(SpellSlot.Q, q.CastRange);
                 Q.SetTargetted(q.DelayTotalTimePercent, q.SpellCastTime);
             }
             if (W == null || !W.IsSkillshot)
             {
-                W = new Spell(SpellSlot.W, w.CastRange);
                 W.SetTargetted(w.DelayTotalTimePercent, q.SpellCastTime);
             }
             if (E == null || !E.IsSkillshot)
             {
-                E = new Spell(SpellSlot.E, e.CastRange);
                 E.SetTargetted(e.DelayTotalTimePercent, e.SpellCastTime);
             }
             if(R == null || !R.IsSkillshot)
             {
-                R = new Spell(SpellSlot.R, r.CastRange);
                 R.SetTargetted(r.DelayTotalTimePercent, r.SpellCastTime);
             }
 
+            //Why do we use a dictionary? :s
             Spells.Add(SpellSlot.Q, Q);
             Spells.Add(SpellSlot.W, W);
             Spells.Add(SpellSlot.E, E);
