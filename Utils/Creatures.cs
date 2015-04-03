@@ -74,8 +74,13 @@ namespace AiM.Utils
 
         public static void Update()
         {
+            AllyMinions.Clear();
             AllyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet());
+
+            EnemyMinions.Clear();
             EnemyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsValidTarget() && !m.IsDead && !m.IsHeroPet());
+
+            ClosestAllyMinions.Clear();
             ClosestAllyMinions = ObjectHandler.Get<Obj_AI_Minion>().FindAll(m => m.IsAlly && !m.IsDead && !m.IsHeroPet() && m.Distance(Heroes.Me.Position) < 2000);
         }
     }

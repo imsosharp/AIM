@@ -50,7 +50,7 @@ namespace AiM.Behaviors.ARAM
                 if (followminion != null && followminion.IsValid && !followminion.IsDead && !followminion.IsHeroPet())
                 {
                     AiMPlugin.Orbwalker.SetOrbwalkingPoint(
-                        new Vector2(followminion.Position.X + randomDist, followminion.ServerPosition.Y + randomDist).To3D());
+                        new Vector2(followminion.Position.X + randomDist, followminion.Position.Y + randomDist).To3D());
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                     return BehaviorState.Success;
                 }
@@ -67,7 +67,7 @@ namespace AiM.Behaviors.ARAM
                     AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.Combo;
                     if (!target.UnderTurret() && target != null)
                     {
-                        AiMPlugin.Orbwalker.SetOrbwalkingPoint(target.ServerPosition);
+                        AiMPlugin.Orbwalker.SetOrbwalkingPoint(target.Position);
                         return BehaviorState.Success;
                     }
                     return BehaviorState.Failure;
@@ -111,14 +111,14 @@ namespace AiM.Behaviors.ARAM
                 var rInt = new Random(Environment.TickCount).Next(100, 200) * Wizard.GetAggressiveMultiplier();
                 if (ObjectHandler.Player.UnderTurret(true) && ObjectHandler.Player.CountNearbyAllyMinions(800) < 2)
                 {
-                    var nearbyAllyTurret = Turrets.AllyTurrets.OrderBy(t => t.Distance(ObjectHandler.Player.ServerPosition)).FirstOrDefault();
+                    var nearbyAllyTurret = Turrets.AllyTurrets.OrderBy(t => t.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
                     pos.X = nearbyAllyTurret.Position.X + rInt;
                     pos.Y = nearbyAllyTurret.Position.Y + rInt;
                 }
                 else
                 {
-                    pos.X = ObjectHandler.Player.ServerPosition.X + rInt; 
-                    pos.Y = ObjectHandler.Player.ServerPosition.Y + rInt;
+                    pos.X = ObjectHandler.Player.Position.X + rInt; 
+                    pos.Y = ObjectHandler.Player.Position.Y + rInt;
                 }
                 AiMPlugin.Orbwalker.ActiveMode = LeagueSharp.Common.Orbwalking.OrbwalkingMode.LaneClear;
                 AiMPlugin.Orbwalker.SetOrbwalkingPoint(pos.To3D());
@@ -154,7 +154,7 @@ namespace AiM.Behaviors.ARAM
         internal static Conditional ShouldPushLane = new Conditional(
             () =>
             {
-                if (ObjectHandler.Player.ServerPosition.CountNearbyEnemies(4000) == 0 && Wizard.GetFarthestMinion() != null)
+                if (ObjectHandler.Player.Position.CountNearbyEnemies(4000) == 0 && Wizard.GetFarthestMinion() != null)
                 {
                     return true;
                 }

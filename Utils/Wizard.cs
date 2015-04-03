@@ -67,7 +67,7 @@ namespace AiM.Utils
 
         public static int CountNearbyAllyMinions(this Obj_AI_Base x, int distance)
         {
-            return Minions.AllyMinions.Count(minion => minion.Distance(x.ServerPosition) < distance);
+            return Minions.AllyMinions.Count(minion => minion.Distance(x.Position) < distance);
         }
 
         public static int CountNearbyAllyMinions(this Vector3 x, int distance)
@@ -77,7 +77,7 @@ namespace AiM.Utils
 
         public static int CountNearbyAllies(this Obj_AI_Base x, int distance)
         {
-            return Heroes.AllyHeroes.Count(hero => !hero.IsDead && !hero.IsMe && hero.Distance(x.ServerPosition) < distance);
+            return Heroes.AllyHeroes.Count(hero => !hero.IsDead && !hero.IsMe && hero.Distance(x.Position) < distance);
         }
 
         public static int CountNearbyAllies(this Vector3 x, int distance)

@@ -53,7 +53,7 @@ namespace AiM.Utils
             {
                 LastUpdate = Environment.TickCount;
                 Positioning.Update();
-                var curpos = ObjectHandler.Player.ServerPosition;
+                var curpos = ObjectHandler.Player.Position;
                 if (TeamfightPosition == null)
                     TeamfightPosition = new Vector2(curpos.X, curpos.Y);
                 if (ExpRangePosition == null)
@@ -155,7 +155,7 @@ namespace AiM.Utils
             if (Wizard.GetClosestEnemyMinion() != null && Wizard.GetClosestEnemyMinion().IsVisible && !Wizard.GetClosestEnemyMinion().IsDead && Wizard.GetClosestEnemyMinion().IsValid<Obj_AI_Minion>())
             {
                 //advanced algorithms
-                var expZonePaths = (new Geometry.Circle(Wizard.GetClosestEnemyMinion().ServerPosition.To2D(), 1350)).ToPolygon().ToClipperPath();
+                var expZonePaths = (new Geometry.Circle(Wizard.GetClosestEnemyMinion().Position.To2D(), 1350)).ToPolygon().ToClipperPath();
 
                 //remove walls
                 foreach (var path in expZonePaths)
@@ -185,10 +185,10 @@ namespace AiM.Utils
             {
                 var highestSpellRange = spellsOrderedByRange.FirstOrDefault().CastRange;
                 return new Geometry.Circle(
-                    hero.ServerPosition.To2D(),
+                    hero.Position.To2D(),
                     highestSpellRange > hero.AttackRange ? highestSpellRange : hero.AttackRange);
             }
-            return new Geometry.Circle(hero.ServerPosition.To2D(), hero.AttackRange);
+            return new Geometry.Circle(hero.Position.To2D(), hero.AttackRange);
         }
     }
 }
