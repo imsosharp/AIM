@@ -45,36 +45,31 @@ namespace AiM.Plugins
         public Default()
         {
             //Initializing spells
-            Q = new Spell(SpellSlot.Q, 600);
-            W = new Spell(SpellSlot.W, 450);
-            E = new Spell(SpellSlot.E, 200);
-            R = new Spell(SpellSlot.R, 600);
-
             List<Data.SpellData> MySkillShots = new List<Data.SpellData>();
             MySkillShots = Data.SpellDatabase.Spells.FindAll(s => s.ChampionName == ObjectHandler.Player.ChampionName);
             foreach(var ss in MySkillShots)
             {
                 if (ss.Slot == SpellSlot.Q)
                 {
-                    Q.Range = ss.Range;
+                    Q = new Spell(SpellSlot.Q, ss.Range);
                     Q.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                     return;
                 } 
                 if (ss.Slot == SpellSlot.W)
                 {
-                    W.Range = ss.Range;
+                    W = new Spell(SpellSlot.Q, ss.Range);
                     W.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                     return;
                 }
                 if (ss.Slot == SpellSlot.E)
                 {
-                    E.Range = ss.Range;
+                    E = new Spell(SpellSlot.Q, ss.Range);
                     E.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                     return;
                 }
                 if (ss.Slot == SpellSlot.R)
                 {
-                    R.Range = ss.Range;
+                    R = new Spell(SpellSlot.Q, ss.Range);
                     R.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                 }
             }
@@ -86,24 +81,24 @@ namespace AiM.Plugins
             var r = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.R).Name);
 
             //Set spells
-            if (!Q.IsSkillshot)
+            if (Q == null || !Q.IsSkillshot)
             {
-                Q.Range = q.CastRange;
+                Q = new Spell(SpellSlot.Q, q.CastRange);
                 Q.SetTargetted(q.DelayTotalTimePercent, q.SpellCastTime);
             }
-            if (!W.IsSkillshot)
+            if (W == null || !W.IsSkillshot)
             {
-                W.Range = w.CastRange;
+                W = new Spell(SpellSlot.W, w.CastRange);
                 W.SetTargetted(w.DelayTotalTimePercent, q.SpellCastTime);
             }
-            if (!E.IsSkillshot)
+            if (E == null || !E.IsSkillshot)
             {
-                E.Range = e.CastRange;
+                E = new Spell(SpellSlot.E, e.CastRange);
                 E.SetTargetted(e.DelayTotalTimePercent, e.SpellCastTime);
             }
-            if(!R.IsSkillshot)
+            if(R == null || !R.IsSkillshot)
             {
-                R.Range = r.CastRange;
+                R = new Spell(SpellSlot.R, r.CastRange);
                 R.SetTargetted(r.DelayTotalTimePercent, r.SpellCastTime);
             }
 
