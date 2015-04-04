@@ -55,7 +55,7 @@ namespace AiM.Utils
             {
                 Minions.Update();
             }
-            if (sender.IsAvoidable())
+            if (AiMPlugin.Config.Item("AvoidEnabled").GetValue<bool>() && sender.IsAvoidable())
             {
                 GameObjects.AvoidableObjects.Add(sender, sender.Position);
             }
@@ -66,7 +66,7 @@ namespace AiM.Utils
             {
                 Minions.Update();
             }
-            if (GameObjects.AvoidableObjects.Any(o => o.Key == sender))
+            if (AiMPlugin.Config.Item("AvoidEnabled").GetValue<bool>() && GameObjects.AvoidableObjects.Any(o => o.Key == sender))
             {
                 GameObjects.AvoidableObjects.Remove(sender);
             }
@@ -103,8 +103,8 @@ namespace AiM.Utils
         public static void Load()
         {
             Me = ObjectHandler.Player;
-            AllyHeroes = HeroManager.Allies;
-            EnemyHeroes = HeroManager.Enemies;
+            AllyHeroes = ObjectHandler.Get<Obj_AI_Hero>().FindAll(h => h.IsAlly);
+            EnemyHeroes = ObjectHandler.Get<Obj_AI_Hero>().FindAll(h => !h.IsAlly);
         }
     }
 }

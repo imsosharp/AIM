@@ -117,7 +117,7 @@ namespace AiM
         internal static List<Spell> CastableOnAllies = new List<Spell>();
         internal static List<Spell> SelfCastable = new List<Spell>();
 
-        internal static Dictionary<SpellSlot, Spell> Spells = new Dictionary<SpellSlot, Spell>();
+        internal static List<Spell> Spells = new List<Spell>();
 
         internal static List<Spell> AvailableSpells = new List<Spell>();
 
@@ -169,25 +169,14 @@ namespace AiM
                 {
                     args.Process = false;
                 }
-                if (args.TargetPosition.UnderTurret(true) && args.TargetPosition.GetClosestEnemyTurret().CountNearbyAllyMinions(850) < 3 && !ObjectHandler.Player.UnderTurret(true))
+                if (args.TargetPosition.UnderTurret(true) && args.TargetPosition.GetClosestEnemyTurret().CountNearbyAllyMinions(800) < 4)
                 {
                     args.Process = false;
-                    return;
-                }
-                if (args.TargetPosition.UnderTurret(true) && args.TargetPosition.GetClosestEnemyTurret().CountNearbyAllyMinions(850) < 3 && ObjectHandler.Player.UnderTurret(true))
-                {
-                    args.Process = false;
-                    Wizard.MoveToRandomAllyMinion();
                     return;
                 }
 
                 if (Environment.TickCount - LastMove < Config.Item("MovementDelay").GetValue<Slider>().Value &&
                     Config.Item("MovementEnabled").GetValue<bool>())
-                {
-                    args.Process = false;
-                    return;
-                }
-                if (args.TargetPosition.GetClosestEnemyTurret().Distance(args.TargetPosition) < 800 && args.TargetPosition.GetClosestEnemyTurret().CountNearbyAllyMinions(800) <= 2)
                 {
                     args.Process = false;
                     return;
