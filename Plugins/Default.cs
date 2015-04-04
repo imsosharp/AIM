@@ -131,6 +131,7 @@ namespace AiM.Plugins
                 //pure SBTW logic right here
                 foreach (var spell in Spells)
                 {
+                    var allyTarget = Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
                     var target = GetTarget(spell.Range, TargetSelector.DamageType.Magical);
                     if (!spell.IsReady() || target == null)
                     {
@@ -141,9 +142,9 @@ namespace AiM.Plugins
                         spell.Cast(target);
                         return;
                     }
-                    if (CastableOnAllies.Contains(spell))
+                    if (CastableOnAllies.Contains(spell) && allyTarget != null)
                     {
-                        spell.CastOnUnit(Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault());
+                        spell.CastOnUnit(allyTarget);
                         return;
                     }
                     if (SelfCastable.Contains(spell))
@@ -185,13 +186,14 @@ namespace AiM.Plugins
             //Test if it can be cast on self/ally
             foreach(var spell in AvailableSpells)
             {
+                var allyTarget = Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
                 if (TestedSpells.Contains(spell))
                 {
                     return;
                 }
-                if (spell.IsReady())
+                if (spell.IsReady() && allyTarget != null)
                 {
-                    spell.CastOnUnit(Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault());
+                    spell.CastOnUnit(allyTarget);
                 }
                 if (!spell.IsReady())
                 {
