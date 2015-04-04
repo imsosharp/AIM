@@ -42,7 +42,25 @@ namespace AiM.Behaviors.ARAM
     internal static class Orbwalking
     {
         #region Actions
-        internal static BehaviorAction PushLaneAction = new BehaviorAction(
+
+        internal static BehaviorAction UnderEnemyTurretAction = new BehaviorAction(() =>
+        {
+            var theTurret = ObjectHandler.Player.Position.GetClosestEnemyTurret();
+            if (!ObjectHandler.Player.UnderTurret(true))
+            {
+                return BehaviorState.Failure;
+            }
+            if (theTurret.CountNearbyAllyMinions(800) < 4)
+            {
+                Wizard.MoveToRandomAllyMinion();
+                return BehaviorState.Running;
+            }
+            AiMPlugin.Orbwalker.ForceTarget(theTurret);
+            return BehaviorState.Success;
+        }
+        );
+
+    internal static BehaviorAction PushLaneAction = new BehaviorAction(
             () =>
             {
                 var followminion = Wizard.GetFarthestMinion();
@@ -159,6 +177,11 @@ namespace AiM.Behaviors.ARAM
                 return false;
             });
 
+        internal static Conditional UnderEnemyTurretConditional = new Conditional(() =>
+        {
+            return ObjectHandler.Player.UnderTurret(true);
+        });
+
         internal static Conditional ShouldFarm = new Conditional(
             () =>
             {
@@ -220,6 +243,7 @@ namespace AiM.Behaviors.ARAM
         internal static Inverter DontGoToLane = new Inverter(new Conditional(() => ShouldGoToLane.Tick() == BehaviorState.Failure));
         internal static Inverter DontTeamfight = new Inverter(new Conditional(() => ShouldTeamfight.Tick() == BehaviorState.Failure));
         internal static Inverter MixedInverter = new Inverter(new Conditional(() => MixedConditional.Tick() == BehaviorState.Failure));
+        internal static Inverter UnderEnemyTurretInverter = new Inverter(new Conditional(() => UnderEnemyTurretConditional.Tick() == BehaviorState.Failure));
         #endregion
 
         #region Sequences
@@ -228,6 +252,7 @@ namespace AiM.Behaviors.ARAM
         internal static Sequence Farm = new Sequence(ShouldFarm, DontFarm, FarmAction);
         internal static Sequence GoToLane = new Sequence(ShouldGoToLane, DontGoToLane, GoToLaneAction);
         internal static Sequence Mixed = new Sequence(MixedConditional, MixedInverter, MixedAction);
+        internal static Sequence UnderEnemyTurret = new Sequence(UnderEnemyTurretConditional, UnderEnemyTurretInverter, UnderEnemyTurretAction);
         #endregion
     }
 }

@@ -98,16 +98,20 @@ namespace AiM.Plugins
 
         public override void OnGameUpdate(EventArgs args)
         {
+            //no enemies in game, no point in wasting resources on playing with the spells like an autist
             if (!Heroes.EnemyHeroes.Any())
             {
                 return;
             }
+
+            //Start the Voodoo Magic!
             if (TestedSpellsOnSelf.Count() != AvailableSpells.Count()
                 || TestedSpellsOnAllies.Count() != AvailableSpells.Count()
                 || AvailableSpells.Count() != Spells.Count())
             {
                 IndexSpells();
             }
+
             //pure SBTW logic right here
             foreach (var spell in Spells)
             {
@@ -117,6 +121,7 @@ namespace AiM.Plugins
                 }
 
                 #region Aggressive Spells
+
                 var target = GetTarget(spell.Range, TargetSelector.DamageType.Magical);
 
                 if (spell.IsSkillshot && target != null)
@@ -130,9 +135,11 @@ namespace AiM.Plugins
                     spell.CastOnUnit(target);
                     break;
                 }
+
                 #endregion
 
                 #region Defensive Spells
+
                 var allyTarget =
                     Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
 
@@ -146,6 +153,7 @@ namespace AiM.Plugins
                     spell.CastOnUnit(ObjectHandler.Player);
                     break;
                 }
+
                 #endregion
             }
         }
@@ -180,7 +188,7 @@ namespace AiM.Plugins
                 }
             }
             //Test if it can be cast on self/ally
-            foreach(var spell in AvailableSpells)
+            foreach (var spell in AvailableSpells)
             {
                 //if we arleady tested the spell, skip it
                 if (TestedSpellsOnAllies.Contains(spell) && TestedSpellsOnSelf.Contains(spell))
@@ -189,7 +197,8 @@ namespace AiM.Plugins
                 }
 
                 //our lab rat
-                var allyTarget = Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
+                var allyTarget =
+                    Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
 
                 //test if we have to pet the rat
                 if (!SpellsCastableOnAllies.Contains(spell))
@@ -233,7 +242,7 @@ namespace AiM.Plugins
                     }
                 }
             }
-#endregion
+            #endregion
 
         }
     }
