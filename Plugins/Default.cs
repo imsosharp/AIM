@@ -42,125 +42,119 @@ namespace AiM.Plugins
 {
     internal class Default : AiMPlugin
     {
+        internal static List<Spell> AvailableSpells = new List<Spell>();
+        internal static List<Spell> TestedSpellsOnSelf = new List<Spell>();
+        internal static List<Spell> TestedSpellsOnAllies = new List<Spell>();
+        internal static List<Spell> SpellsCastableOnSelf = new List<Spell>();
+        internal static List<Spell> SpellsCastableOnAllies = new List<Spell>();
+        internal static List<Spell> SpellsCastableOnEnemies = new List<Spell>();
+
         public Default()
         {
-            try
+            //initializing spells
+            Q = new Spell(SpellSlot.Q);
+            W = new Spell(SpellSlot.W);
+            E = new Spell(SpellSlot.E);
+            R = new Spell(SpellSlot.R);
+
+            //add them to a list to process them later on for voodoo magic
+            Spells.Add(Q);
+            Spells.Add(W);
+            Spells.Add(E);
+            Spells.Add(R);
+
+            //find skillshots in evade spelldb
+            List<Data.SpellData> MySkillShots =
+                Data.SpellDatabase.Spells.FindAll(s => s.ChampionName == ObjectHandler.Player.ChampionName);
+
+            //set skillshots
+            foreach (var ss in MySkillShots)
             {
-                //Get SpellData for spells
-                var q = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.Q).Name);
-                var w = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.W).Name);
-                var e = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.E).Name);
-                var r = SpellData.GetSpellData(ObjectHandler.Player.GetSpell(SpellSlot.R).Name);
-
-                //Initializing spells
-                Q = new Spell(SpellSlot.Q, q.CastRange);
-                W = new Spell(SpellSlot.W, w.CastRange);
-                E = new Spell(SpellSlot.E, e.CastRange);
-                R = new Spell(SpellSlot.R, e.CastRange);
-
-                List<Data.SpellData> MySkillShots = Data.SpellDatabase.Spells.FindAll(s => s.ChampionName == ObjectHandler.Player.ChampionName);
-                for (var i = 0; i < MySkillShots.Count(); i++)
+                var theSpell = Spells.First(s => s.Slot == ss.Slot);
+                if (theSpell != null)
                 {
-                    var ss = MySkillShots[i];
-                    if (ss.Slot == SpellSlot.Q)
-                    {
-                        Q.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
-                        break;
-                    }
-                    if (ss.Slot == SpellSlot.W)
-                    {
-                        W.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
-                        break;
-                    }
-                    if (ss.Slot == SpellSlot.E)
-                    {
-                        E.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
-                        break;
-                    }
-                    if (ss.Slot == SpellSlot.R)
-                    {
-                        R.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
-                        break;
-                    }
+                    theSpell.Range = ss.Range;
+                    theSpell.SetSkillshot(ss.Delay, ss.RawRadius, ss.MissileSpeed, true, ss.Type);
                 }
-                //Set spells
-                if (!Q.IsSkillshot)
-                {
-                    Q.SetTargetted(q.DelayTotalTimePercent, q.SpellCastTime);
-                }
-                if (!W.IsSkillshot)
-                {
-                    W.SetTargetted(w.DelayTotalTimePercent, q.SpellCastTime);
-                }
-                if (!E.IsSkillshot)
-                {
-                    E.SetTargetted(e.DelayTotalTimePercent, e.SpellCastTime);
-                }
-                if (!R.IsSkillshot)
-                {
-                    R.SetTargetted(r.DelayTotalTimePercent, r.SpellCastTime);
-                }
-
-                Spells.Add(Q);
-                Spells.Add(W);
-                Spells.Add(E);
-                Spells.Add(R);
-
-                ComboConfig.AddBool("ComboQ", "Use Q", true);
-                ComboConfig.AddBool("ComboW", "Use W", true);
-                ComboConfig.AddBool("ComboE", "Use E", true);
-                ComboConfig.AddBool("ComboR", "Use R", true);
             }
-            catch (Exception e)
+
+            //spell is not a skillshot? make it targettable.
+            foreach (var spell in Spells)
             {
-                Console.WriteLine(e);
+                var sd = SpellData.GetSpellData(ObjectManager.Player.GetSpell(spell.Slot).Name);
+                if (!spell.IsSkillshot && sd != null)
+                {
+                    spell.Range = sd.CastRange;
+                    spell.SetTargetted(sd.DelayTotalTimePercent, sd.SpellCastTime);
+                }
             }
+
+            //initialize combo menu
+            ComboConfig.AddBool("ComboQ", "Use Q", true);
+            ComboConfig.AddBool("ComboW", "Use W", true);
+            ComboConfig.AddBool("ComboE", "Use E", true);
+            ComboConfig.AddBool("ComboR", "Use R", true);
         }
 
         public override void OnGameUpdate(EventArgs args)
         {
-            if (Heroes.EnemyHeroes.Count() == 0)
+            if (!Heroes.EnemyHeroes.Any())
             {
                 return;
             }
-                if (TestedSpells.Count() != AvailableSpells.Count()
-                    || AvailableSpells.Count() != Spells.Count())
+            if (TestedSpellsOnSelf.Count() != AvailableSpells.Count()
+                || TestedSpellsOnAllies.Count() != AvailableSpells.Count()
+                || AvailableSpells.Count() != Spells.Count())
+            {
+                IndexSpells();
+            }
+            //pure SBTW logic right here
+            foreach (var spell in Spells)
+            {
+                if (!spell.IsReady())
                 {
-                    IndexSpells();
+                    break;
                 }
-                //pure SBTW logic right here
-                foreach (var spell in Spells)
+
+                #region Aggressive Spells
+                var target = GetTarget(spell.Range, TargetSelector.DamageType.Magical);
+
+                if (spell.IsSkillshot && target != null)
                 {
-                    var allyTarget = Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
-                    var target = GetTarget(spell.Range, TargetSelector.DamageType.Magical);
-                    if (!spell.IsReady() || target == null)
-                    {
-                        return;
-                    }
-                    if (spell.IsSkillshot)
-                    {
-                        spell.Cast(target);
-                        return;
-                    }
-                    if (CastableOnAllies.Contains(spell) && allyTarget != null)
-                    {
-                        spell.CastOnUnit(allyTarget);
-                        return;
-                    }
-                    if (SelfCastable.Contains(spell))
-                    {
-                        spell.CastOnUnit(ObjectHandler.Player);
-                        return;
-                    }
-                    spell.CastOnUnit(GetTarget(spell.Range, TargetSelector.DamageType.Magical));
+                    spell.Cast(target);
+                    break;
                 }
+
+                if (SpellsCastableOnEnemies.Contains(spell) && target != null)
+                {
+                    spell.CastOnUnit(target);
+                    break;
+                }
+                #endregion
+
+                #region Defensive Spells
+                var allyTarget =
+                    Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
+
+                if (SpellsCastableOnAllies.Contains(spell) && allyTarget != null)
+                {
+                    spell.CastOnUnit(allyTarget);
+                    break;
+                }
+                if (SpellsCastableOnSelf.Contains(spell))
+                {
+                    spell.CastOnUnit(ObjectHandler.Player);
+                    break;
+                }
+                #endregion
+            }
         }
 
-        #region Index Spells To See If They Should Be Casted On Allies Or Enemies
+        #region Advanced and patented algorithms that tests a spell
         public static void IndexSpells()
         {
             
-            if (Heroes.AllyHeroes.Count() == 0 || Heroes.EnemyHeroes.Count() == 0)
+            if (!Heroes.AllyHeroes.Any() || !Heroes.EnemyHeroes.Any())
             {
                 return;
             }
@@ -170,15 +164,17 @@ namespace AiM.Plugins
                 foreach (var spell in Spells)
                 {
                     if (AvailableSpells.Contains(spell))
-                    { 
-                        return;
+                    {
+                        break;
                     }
                     if (spell.Level != 0)
                     {
                         AvailableSpells.Add(spell);
+                        //if they're skillshots, we arleady know how to use them
                         if (spell.IsSkillshot)
                         {
-                            TestedSpells.Add(spell);
+                            TestedSpellsOnAllies.Add(spell);
+                            TestedSpellsOnSelf.Add(spell);
                         }
                     }
                 }
@@ -186,29 +182,56 @@ namespace AiM.Plugins
             //Test if it can be cast on self/ally
             foreach(var spell in AvailableSpells)
             {
+                //if we arleady tested the spell, skip it
+                if (TestedSpellsOnAllies.Contains(spell) && TestedSpellsOnSelf.Contains(spell))
+                {
+                    break;
+                }
+
+                //our lab rat
                 var allyTarget = Heroes.AllyHeroes.OrderBy(h => h.Distance(ObjectHandler.Player.Position)).FirstOrDefault();
-                if (TestedSpells.Contains(spell))
+
+                //test if we have to pet the rat
+                if (!SpellsCastableOnAllies.Contains(spell))
                 {
-                    return;
+                    //pet the lab rat
+                    if (spell.IsReady() && allyTarget != null)
+                    {
+                        spell.CastOnUnit(allyTarget);
+                    }
+
+                    //lab rat has been successfuly tested
+                    if (!spell.IsReady())
+                    {
+                        SpellsCastableOnAllies.Add(spell);
+                    }
+                    TestedSpellsOnAllies.Add(spell);
                 }
-                if (spell.IsReady() && allyTarget != null)
+
+                //lets see what else we can do with this spell, maybe it can gib me wings like redbull :DDDD
+                if (!TestedSpellsOnSelf.Contains(spell))
                 {
-                    spell.CastOnUnit(allyTarget);
+                    //try to cast it
+                    if (spell.IsReady())
+                    {
+                        spell.CastOnUnit(ObjectHandler.Player);
+                    }
+                    //it did go on cooldown so I can use it, cool
+                    if (!spell.IsReady())
+                    {
+                        SpellsCastableOnSelf.Add(spell);
+                    }
+                    TestedSpellsOnSelf.Add(spell);
                 }
-                if (!spell.IsReady())
+
+                //now we know
+                if (TestedSpellsOnAllies.Contains(spell) && TestedSpellsOnSelf.Contains(spell))
                 {
-                    CastableOnAllies.Add(spell);
-                    TestedSpells.Add(spell);
+                    if (!SpellsCastableOnAllies.Contains(spell) && !SpellsCastableOnSelf.Contains(spell))
+                    {
+                        SpellsCastableOnEnemies.Add(spell);
+                    }
                 }
-                if (spell.IsReady())
-                {
-                    spell.CastOnUnit(ObjectHandler.Player);
-                }
-                if (!spell.IsReady())
-                {
-                    SelfCastable.Add(spell);
-                }
-                TestedSpells.Add(spell);
             }
 #endregion
 

@@ -111,15 +111,7 @@ namespace AiM
         internal static Spell E;
         internal static Spell R;
 
-        internal static bool PreventCodeFromExecuting;
-
-        internal static List<Spell> TestedSpells = new List<Spell>();
-        internal static List<Spell> CastableOnAllies = new List<Spell>();
-        internal static List<Spell> SelfCastable = new List<Spell>();
-
         internal static List<Spell> Spells = new List<Spell>();
-
-        internal static List<Spell> AvailableSpells = new List<Spell>();
 
         public static IEnumerable<SpellDataInst> MainSpells
         {
